@@ -248,3 +248,94 @@ read was structurally incomplete.
   session's files — **Tier 1**, encoding the eight domain invariants in `packages/ledger` and
   `packages/pricing` as money types, schema constraints, and a reservation state machine, each
   attacked by a named seeded property test with a stated case count.
+
+## 2026-08-10T20:20:00Z — Tier 0 red-gate queue: CI native provisioning, dependency evidence, Playwright teardown proof
+
+Concurrent-session note: two agent sessions are working this one repository and working tree at
+the same time. Work was split by file ownership and both sessions agreed to explicit-path commits
+only, no `git checkout`/`restore`/`stash`/`reset`/`clean` on the shared tree, clean-checkout
+verification via `git worktree`, and advance notice before cycling the shared 4160-4169 topology.
+This session owns `tooling/ci/**`, `tooling/dependencies/**`, `tooling/dev/{down,up,e2e-server,
+preflight,ownership,listeners}.mjs`, `tooling/run-playwright-owned.mjs`, `playwright.config.ts`,
+`.github/workflows/**` and those files' tests.
+
+### Behaviour delivered
+
+- **Linux CI native provisioning (queue item 5, was red).** Redis 8.10.0's default make goal routes
+  through `scripts/build.sh`, which builds Redis core and then every module bundled under
+  `modules/*/src`. RedisSearch needs a Rust toolchain this job deliberately does not provision, so
+  it produced no `.so` and `make build` exited 2 roughly six minutes in, before bootstrap ever ran.
+  Confirmed from the failed run's own log: `ERROR: make build finished with module failure(s):
+  redisearch` / `make: *** [Makefile:109: build] Error 1`, after redisbloom, rejson and
+  redistimeseries had built successfully. Now builds only the two binaries the runtime contract
+  admits, and asserts that boundary structurally instead of inheriting it from the make invocation.
+- **Preflight version-pin escaping.** The PostgreSQL patterns escaped only the first dot via
+  `String.replace`, so a version carrying two dots would leave the second unescaped and match any
+  character there, admitting a foreign build. Replaced with total metacharacter escaping.
+- **Dependency evidence (queue item 7, partial).** The evidence fingerprint covers the CI
+  provisioner and its toolchain register, so changing them correctly staled it. Regenerated from
+  frozen inputs rather than relaxing the check, and added the provisioned-surface refusal tests to
+  the fingerprinted input set so weakening a refusal stales the evidence instead of passing.
+- **Playwright webServer ownership and teardown (queue item 4, was red).** Three separate defects:
+  the webServer ran through an `npm run` shim so Playwright's SIGTERM never reached the process
+  that owns the topology; the teardown assertion sampled listener and record counts once,
+  immediately after Playwright returned, which is a race and cannot distinguish a torn-down
+  topology from a webServer that never started; and `waitForVerifiedExit` in `dev:down` treated
+  every non-`not-running` ownership reason as a hard error even though each one proves the recorded
+  process exited. All three fixed; details and the invalid-test removal rationale are in commit
+  `a62f4fa`.
+
+### Commands run and evidence emitted
+
+- `make dev-health` — passed all seven allocated services on `127.0.0.1:4160-4169`.
+- Redis build boundary verified against the real archive: downloaded
+  `redis-8.10.0.tar.gz`, whose SHA-256 `f1baa4b28befd417aa6577ebeedde9e9fc7814cfcc299b2a6d2fd99ef7420a6c`
+  matches the committed pin byte-for-byte; `make -C src BUILD_TLS=no MALLOC=libc redis-server
+  redis-cli` linked both binaries in 21s; they report `Redis server v=8.10.0` and
+  `redis-cli 8.10.0`; `find` showed zero `.so` outside `deps/`.
+- `make test-e2e` — **exits 0**. Log records the full ownership chain: `[dev:e2e-server] READY
+  run=02e07a22-42c6-4806-8373-fa86ea2856d8 ownership=started-here`, both Chromium tests passing,
+  `[dev:e2e-server] stopping reason=SIGTERM`, `[dev:e2e-server] PASS stopped the topology it
+  started.`, `[playwright-owned] PASS Playwright started and stopped its exact repository-owned
+  webServer topology run=02e07a22-42c6-4806-8373-fa86ea2856d8` (the same run id it started), and
+  the standing topology restored as `run=e3c751be-b55d-4c9d-be0d-634acf844f63`.
+- Full unit/property suite — 39 files, 337 tests passing, including the concurrent session's Tier 1
+  reservation property tests at 2000 cases each.
+- `npm run dependencies:verify` then `--check` — 22 unique direct dependencies across 31
+  declarations; both npm audit scopes observed 0 known vulnerabilities at 2026-08-10T20:05:47.309Z;
+  the non-mutating recheck confirmed inputs and digests match.
+- `npm run boundaries` — 119 modules, 329 dependencies, no violations, negative fixtures rejected.
+- New refusal tests: `tooling/test/provisioned-native-surface.test.mjs` (9),
+  `tooling/test/playwright-teardown-proof.test.mjs` (7), plus a 2000-case seeded property test
+  (seed 20260810) asserting an anchored escaped version literal matches exactly itself.
+- Clean-checkout worktree created at the pushed commit for verification independent of either
+  session's uncommitted work.
+
+### What is now true that was not true before
+
+Linux CI gets past native provisioning and bootstrap for the first time: on run 31427377322 the
+`Build exact-version native tools from SHA-256-verified source`, `Bootstrap through make` and
+Chromium-deps steps are all green, and from a clean checkout on Linux `toolchain:check`,
+`format:check`, `lint`, `typecheck`, `boundaries` (103 modules, 276 dependencies) and
+`dependencies:check` all pass. The Playwright gate now proves ownership rather than sampling it,
+and `dev:down` no longer reports a successful shutdown as a failure.
+
+### Still red / not verified
+
+- The full canonical verifier has **not** yet passed on Linux. Run 31427377322 reached `test` and
+  failed 5 of 244 tests in `tooling/dev/test/ownership.test.mjs`, Linux-only, from a mock gap that
+  commit `a62f4fa` fixes. That fix is pushed but not yet confirmed by a Linux run.
+- `make verify-all` has not passed end to end locally either, because `format:check` currently
+  fails on the other session's uncommitted `packages/ledger` files. Not this session's files.
+- No clean-checkout `verify-all` pass has been recorded yet. The worktree exists and is bootstrapped
+  but has not produced a green run.
+- Every §6 release gate G1-G6 remains **unavailable**: there is still no monetary reservation path,
+  ledger schema, tenant authorization, operational stack, or admin ledger view. The repository is
+  **not yet in production** and no §5 clause is satisfied.
+
+### §10.1 next selected
+
+A failing release gate outranks tier work, and the canonical verifier is still red on Linux, so:
+confirm the ownership fix on ubuntu-24.04, then get `verify-all` green from the clean-checkout
+worktree, then close the remaining Tier 0 dependency admission fields in `docs/DEPENDENCIES.md`
+and its machine register.
