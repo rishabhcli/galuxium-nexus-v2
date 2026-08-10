@@ -65,6 +65,15 @@ const SUBPROCESS_VERSION_TEST_PATH = path.join(
   'test',
   'subprocess-and-version.test.mjs',
 );
+// The provisioned-surface refusals bound which native executables CI puts on
+// PATH, so they belong to the same provenance surface as the provisioner they
+// constrain. Fingerprinting them makes weakening a refusal stale the evidence.
+const PROVISIONED_SURFACE_TEST_PATH = path.join(
+  REPOSITORY_ROOT,
+  'tooling',
+  'test',
+  'provisioned-native-surface.test.mjs',
+);
 const PLAYWRIGHT_DESCRIPTOR_PATH = path.join(
   REPOSITORY_ROOT,
   'node_modules',
@@ -1775,6 +1784,7 @@ async function inputEvidence(manifests) {
     NATIVE_PROVISIONER_PATH,
     NPM_CONFIGURATION_PATH,
     PINNED_RUNTIME_PATH,
+    PROVISIONED_SURFACE_TEST_PATH,
     REGISTER_PATH,
     REGISTER_SCHEMA_PATH,
     SCHEMA_VALIDATOR_PATH,

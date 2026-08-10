@@ -1,7 +1,7 @@
 {
   "evidence": {
     "command": "node tooling/dependencies/verify.mjs",
-    "generatedAt": "2026-08-10T11:23:54.451Z",
+    "generatedAt": "2026-08-10T20:05:47.309Z",
     "generator": "tooling/dependencies/verify.mjs",
     "inputs": [
       {
@@ -54,23 +54,23 @@
       },
       {
         "path": "tooling/bounded-download.mjs",
-        "sha256": "21eb3c7a29efa338a6f35f2f0f4ed624492a7eced231f00388e0c611dd98a331"
+        "sha256": "45700936d7cb2f1bbd681e6c8b1a6a4aede9828598e8474de8f3da9ddc82d221"
       },
       {
         "path": "tooling/ci/native-toolchain.json",
-        "sha256": "513c53d085ddbc069e7083566c681504469c203d0e47e598c6448ce17ed2c199"
+        "sha256": "6944b98f7f0a87662a4eaff3796df52566ba00b28ea19c5b7c496e0f9ab235c4"
       },
       {
         "path": "tooling/ci/provision-native.mjs",
-        "sha256": "b3ef62093447851bfc531741170ad24c5fe281fb8db87cdf65b365d11dada3c2"
+        "sha256": "c8e73adae2e87f044be82bde6a9e807a12ca4e5861c60445b40d31300ebe7eb8"
       },
       {
         "path": "tooling/dependencies/evidence-paths.mjs",
-        "sha256": "0f6d21d61a3dfa963dc1bbcf152892e4a5622c725799b4438d1d427206c75007"
+        "sha256": "8c66dabdf7e917a7c1ae1688f5911db15d3f8a38f4edc60fd3f1ff6836a8c3fa"
       },
       {
         "path": "tooling/dependencies/evidence-paths.test.mjs",
-        "sha256": "7a6039029ead298b5c5ce877f4b51159a22e5787567af40df76ce5ce7f2961b5"
+        "sha256": "f461aab46d9214fb56116a443d945cdca612284486c47d762f56f476dc653fc2"
       },
       {
         "path": "tooling/dependencies/register.json",
@@ -82,19 +82,27 @@
       },
       {
         "path": "tooling/dependencies/schema-validator.mjs",
-        "sha256": "2cf339500ca35a0961fe79e510e97802a2f4c825d94068ccf49b080ecce4dc62"
+        "sha256": "98040b9f7cacc340f3f8567b1e98f1ed20ab14ac4c5ad30a62a72272659363d0"
       },
       {
         "path": "tooling/dependencies/schema-validator.test.mjs",
-        "sha256": "f3caf66d309d76f0cee45cb4efc37b43a0688f01c696abbbafc43be2ff287729"
+        "sha256": "a319f19c0eb7b75bcb69053779b06124b977ccce89c837ae3e3b276547228059"
       },
       {
         "path": "tooling/dependencies/verify.mjs",
-        "sha256": "7f0ae3cde8d6e8e66bb458e77325ffea06846f172616bdc88be8f01d2ebd30d0"
+        "sha256": "95ae595c9c4853432f4226bd5df63e77ff3b5adf44022fb5cf10a138ccdbebc0"
       },
       {
         "path": "tooling/pinned-runtime.mjs",
-        "sha256": "09b385e6d19756058fd5ed16ae3b73ec6d5053cedb557cbdc31fca8d463786cd"
+        "sha256": "6c12c71e0d7ada62f81936c1e44af00b3cceadf4b74f3fdd26f96e70325b46b3"
+      },
+      {
+        "path": "tooling/test/provisioned-native-surface.test.mjs",
+        "sha256": "4fe2076e4d524571d57c194250d7798eefbd2ea58fadbe09e3c7632d7c1f1110"
+      },
+      {
+        "path": "tooling/test/subprocess-and-version.test.mjs",
+        "sha256": "ba574256e5c42a5eb93463e520fe5b3d0cbcc87822eaf8d42346d39efd6327c2"
       }
     ],
     "schemaVersion": 1,
@@ -106,7 +114,7 @@
   },
   "audit": {
     "command": "npm audit --json --ignore-scripts --omit=dev --registry=https://registry.npmjs.org/",
-    "completedAt": "2026-08-10T11:23:53.893Z",
+    "completedAt": "2026-08-10T20:05:47.305Z",
     "environmentIsolation": {
       "inheritedEnvironmentVariables": [],
       "npmConfigFiles": "fresh repository-local scratch files with no auth data; user config contains only the fixed registry",
@@ -138,7 +146,7 @@
       "vulnerabilities": {}
     },
     "scope": "production-omit-dev",
-    "startedAt": "2026-08-10T11:23:38.185Z",
+    "startedAt": "2026-08-10T20:05:45.862Z",
     "timeSensitive": true
   },
   "limitation": "This point-in-time npm registry advisory snapshot is not a maintenance review, historical security review, reachability proof, or prediction of future advisory status."
