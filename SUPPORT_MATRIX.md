@@ -20,6 +20,17 @@ An entry becomes **Supported** only when a committed command reproduces its acce
 | Operating systems and CPU architectures | Current development evidence: macOS arm64; intended CI: GitHub-hosted Ubuntu 24.04 x64 with runner-specific source builds | macOS arm64 local health observed only; the Linux workflow executed but failed while building Redis 8.10.0 because the RedisSearch module did not produce an artifact; every combination remains unsupported | Passing clean-checkout evidence on each declared platform; exact native/browser linkage and limitations; production artifact matrix |
 | External side effects | Disabled unless a future typed policy explicitly authorizes one | Unsupported by default | Threat analysis, preview/policy authorization, idempotency, audit, cancellation, and reconciliation tests |
 
+## Scope of the spend guarantee
+
+The ceiling is a hard bound on **authorization**, not on **realized provider spend**. State the difference wherever a number is shown; presenting the second as the first would be the central false claim this system could make.
+
+- **Bounded absolutely:** the sum of amounts this system authorizes for a tenant. No interleaving of concurrent requests, crashes, retries, duplicate deliveries, or cache failures can authorize more than the configured ceiling. This is the invariant, and it is what the concurrency and chaos gates measure.
+- **Not bounded absolutely:** the amount a provider ultimately bills. A provider can report usage for an attempt after this system has already released the hold — the reaper releases an expired reservation only when the attempt was never dispatched, but a provider can still report against an attempt this system had to resolve. That cost is real, is recorded as unreconciled overspend against a dedicated account rather than netted against a live budget, and can therefore push a tenant's *recorded spend* above its ceiling while every *authorization* stayed within it.
+- **Consequence for every surface:** a tenant carrying non-zero unreconciled overspend must never be rendered as "within cap" without qualification. The residual is displayed, attributed to the attempt that caused it, and alerted on. A green state for an unreconciled balance would be exactly the "green for unverified output" this repository prohibits.
+- **Bound on the residual:** limited to what providers can report after resolution, so it is proportional to reconciliation lag, not to traffic. Tightening the reconciliation-lag ratchet in `GOAL.md` §8 tightens this residual; it never removes it.
+
+This limitation is structural rather than a defect awaiting a fix. The honest alternatives are worse: discarding late provider usage would hide real money, and debiting available balance would let a tenant balance go negative, violating invariant I2.
+
 ## Known limitations
 
 - The local status page and readiness APIs are foundation diagnostics, not the canonical budget-control user workflow. No budget API, monetary schema, provider adapter, authenticated workflow, deployment, or Tier 13 release gate is represented as supported.

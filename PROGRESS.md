@@ -339,3 +339,131 @@ A failing release gate outranks tier work, and the canonical verifier is still r
 confirm the ownership fix on ubuntu-24.04, then get `verify-all` green from the clean-checkout
 worktree, then close the remaining Tier 0 dependency admission fields in `docs/DEPENDENCIES.md`
 and its machine register.
+
+## 2026-08-10T20:21:20Z — Tier 1: the eight domain invariants encoded in types, refusals, and seeded properties
+
+> Concurrent-session note: this entry covers only `packages/ledger/**`, `SUPPORT_MATRIX.md`, and
+> `ASSUMPTIONS.md`. The other session owns the Tier 0 lifecycle, CI, and Playwright surfaces and has
+> its own entries. No file outside this set was touched.
+
+### Behaviour delivered
+
+`packages/ledger` stops being a health probe and becomes the monetary domain. Seven new modules, all
+pure and dependency-free apart from the already-admitted `pg` driver.
+
+- **`src/money.ts`** — money as an integer count of nanodollars (1e-9 USD) in `bigint`, bounded to
+  ±1e24, with a canonical decimal-integer wire form. No `number` path exists into or out of an
+  amount, so binary floating point is structurally excluded rather than merely avoided. Three
+  branded tiers — signed, non-negative, strictly positive — so a ledger entry cannot be constructed
+  from an amount that was never proven positive. `ceilingDivideNanodollars` is the only division,
+  and it rounds up, because a quote must upper-bound a cost that is unknowable until the provider
+  call finishes.
+- **`src/tokens.ts`** — token counts as a bounded type admitted from `unknown`, since all three
+  sources (a client's `max_tokens`, a provider's reported usage, this system's own forwarded count)
+  are untrusted and lie differently.
+- **`src/time.ts`** — instants as microseconds since the epoch in `bigint`, matching PostgreSQL
+  `timestamptz` resolution exactly. A non-`Z` offset is refused rather than converted, and
+  `Date.UTC` normalisation is caught by comparing the parsed fields back out, so `2026-02-30` is
+  refused instead of silently stored as March 2nd.
+- **`src/identity.ts`** — **I7**. `TenantScope` is opaque and constructible only by validating a
+  tenant identifier, so a ledger operation cannot be *expressed* without a scope. Identifiers this
+  system mints are a different type from a caller-supplied idempotency key. Uppercase UUIDs are
+  refused rather than normalised, because normalising lets one row be addressed by two strings and
+  defeats any uniqueness constraint over the text form.
+- **`src/reservation.ts`** — **I1, I3, I4, I6** and fencing. Six states: `open`, `dispatched`,
+  `uncertain`, and the terminal `settled`, `released`, `adjusted`. `applyReservationEvent` is total
+  over states × events with no default case, split into per-status handlers each switching
+  exhaustively, so adding a state or an event fails to compile until its behaviour is decided.
+- **`src/admission.ts`** — the runtime half of **I1**. A `DispatchAuthorization` makes an
+  unauthorized provider call fail to compile, and that defence is erased at runtime, so
+  `admitProviderDispatch` re-establishes the same fact against the authoritative record: correct
+  shape, persisted state is `dispatched`, current fencing token, matching identity, matching price
+  version, matching amount, owning scope. Seven stable refusal codes.
+- **`src/cache.ts`** — **I8** as a type that cannot express the forbidden outcome. `CacheAdvice` has
+  a `deny` variant and an `unknown` variant and no allow variant, so no cache read can authorize
+  money. Every failure mode — miss, stale, unavailable, unparseable — maps to `unknown`, which sends
+  the caller to PostgreSQL rather than past it.
+
+Two design decisions worth naming because they resolve real conflicts rather than picking a style:
+
+1. **Expiry of a dispatched attempt holds instead of releasing.** `WINNING_IDEA.md` describes a
+   reaper releasing orphans; I6 requires an unknown outcome to stay reserved. Those conflict for
+   exactly one case — a reservation whose provider call may have started. Splitting `dispatched`
+   from `open` resolves it toward the side that cannot leak money.
+2. **The ceiling bounds authorization, not realized spend.** Provider usage arriving after a
+   reservation resolved posts a `compensate_unreconciled_overspend` movement to a dedicated account
+   rather than debiting available balance, so a tenant's *recorded spend* can exceed its ceiling
+   while every *authorization* stayed within it. Discarding the usage would hide real money;
+   debiting balance would drive a tenant negative and violate I2. Now documented under "Scope of the
+   spend guarantee" in `SUPPORT_MATRIX.md`, with the requirement that no surface renders a tenant
+   carrying a residual as "within cap". Raised by the concurrent session during review; it was right
+   to insist the limitation be published before the claim audit rather than after.
+
+### Invariant encoding map — Tier 1 evidence
+
+| Invariant | Encoded at | Attacked by | Cases |
+|---|---|---|---|
+| I1 no call without a committed reservation | `src/reservation.ts` `DispatchAuthorization` + `applyToOpen`; `src/admission.ts` `admitProviderDispatch` | `reservation.test.ts` "returns a dispatch authorization only from a committed open reservation"; `admission.test.ts` "refuses a dispatch against a reservation in any non-dispatched state", "refuses every malformed candidate a non-type-checked caller can send" | 2,000 + 1,000 |
+| I2 budget never negative | `src/money.ts` `nonNegativeNanodollars`, bound assertions; `settle` refusing settlement above reservation | `money.test.ts` "never silently produces an amount outside the supported magnitude"; `reservation.test.ts` "refuses a settlement larger than the reservation" | 1,000 |
+| I3 exactly one terminal state | `src/reservation.ts` `TERMINAL_RESERVATION_STATUSES`, `applyToTerminal` | `reservation.test.ts` "never leaves a terminal status once entered", "never moves a terminal reservation to a different status" | 2,000 each |
+| I4 settlement and release idempotent and balanced | `src/reservation.ts` `settle` computing the released remainder; `repeatsTerminalState` | `reservation.test.ts` "partitions the reserved amount exactly", "emits movements totalling the reserved amount once terminal", "treats an exact repeat of the terminal event as a no-op" | 2,000 each |
+| I5 pricing version retained with the attempt | `ReservationHold.priceBookVersion` carried into every terminal state; `admission.ts` version-mismatch refusal | `admission.test.ts` "refuses a price book version that disagrees with the record"; `identity.test.ts` price-book-version admission | 1,000 |
+| I6 unknown outcome stays reserved | `src/reservation.ts` `dispatched`/`uncertain` split; `applyToDispatched` expiry path | `reservation.test.ts` "holds the entire reservation while dispatched or uncertain", "turns expiry of a dispatched attempt into a held uncertainty" | 2,000 |
+| I7 tenant scoping at every layer | `src/identity.ts` `TenantScope`, `assertWithinScope`; `admission.ts` two-sided scope check | `identity.test.ts` "refuses every cross-tenant pairing"; `admission.test.ts` "refuses a cross-tenant dispatch from either side" | 1,000 |
+| I8 caches may deny, never authorize | `src/cache.ts` `CacheAdvice` with no allow variant | `cache.test.ts` "has no vocabulary for allowing anything", "treats an unavailable cache as unknown, never as permission" | 1,000 |
+
+Remaining Tier 1 obligations, deliberately not claimed here: the schema/database-constraint half of
+each encoding, the fault-injection scenario per invariant, and the alert-plus-runbook mapping. Those
+are Tier 2, Tier 9, and Tier 11 respectively and are not yet started.
+
+### Commands and evidence
+
+- Pinned Node `24.18.0`: `vitest run packages/ledger/test --maxWorkers=1` — 8 files, **81 tests**
+  passed, seed `20260810` throughout.
+- `vitest run --exclude='tests/integration/**'` — **39 files, 337 tests** passed on the shared tree,
+  including the other session's Tier 0 suites.
+- `tsc -b packages/ledger --pretty false` — exited 0 under strict settings. TypeScript proved the
+  event switches exhaustive: the initial trailing `break`/catch-all statements were reported as
+  TS7027 unreachable code and removed, and the per-status handlers keep exhaustiveness enforced by
+  `noImplicitReturns`.
+- `eslint packages/ledger --max-warnings 0` — exited 0. Reaching that required rewriting every
+  refusal assertion rather than configuring the rule away: `vitest/expect-expect` and
+  `vitest/no-conditional-expect` were both firing because assertions lived inside helper functions
+  and inside property-test branches. Both are legitimate — a conditional `expect` can stop running
+  silently — so the tests now convert each outcome into a comparable value via
+  `test/support/outcome.ts` and compare one whole result against one whole expectation
+  unconditionally. No lint rule was relaxed and no test was weakened.
+- `prettier --check .` — clean repository-wide.
+- One test constant was wrong and the implementation was right: the epoch microseconds for
+  `2026-08-10T12:34:56.654321Z`. Corrected against the system clock
+  (`date -u -j -f %Y-%m-%dT%H:%M:%SZ ... +%s` → `1786365296`), not against the module under test.
+
+### What is now true
+
+Six of the eight invariants are now defended by something stronger than a test: I1 by a capability
+type plus a boundary assertion, I3 and I4 by a total transition function that computes the released
+remainder itself, I5 by a field no terminal state can drop, I7 by a scope that cannot be omitted,
+and I8 by a union with no permissive variant. I2 and I6 are defended by refusals plus seeded
+properties pending their database constraints. The monetary domain is pure and has no persistence,
+no transport, and no service dependency, so none of it is yet exercised against PostgreSQL. The
+repository remains **not yet in production**.
+
+### Risks, migration, rollback, blockers, and next selection
+
+- These types are not yet persisted, so no migration exists and rollback is a source-only revert of
+  `packages/ledger/**`. `packages/ledger/src/index.ts` gained exports and changed none, so the three
+  existing health-probe consumers compile identically.
+- The largest open risk is the one `WINNING_IDEA.md` names as the riskiest assumption and it is
+  still untested: whether the worst-case bound is tight enough to be usable. Ceiling division and a
+  per-budget `max_tokens` ceiling are the intended mitigations, and the overshoot experiment is a
+  Tier 2 kill test, not a Tier 1 deliverable.
+- Mocked-`fs` suites can pass on macOS and fail on Linux, per the other session's CI finding. Every
+  suite added here is pure computation with no filesystem, process, or clock dependency, so it
+  carries no platform-specific risk.
+- No external blocker is active.
+- §10.1 next for this session: Tier 2's hard core, beginning with the double-entry schema and its
+  migration — accounts, reservations, attempts, ledger entries as single rows carrying both a debit
+  and a credit account so an unbalanced entry is unrepresentable, composite tenant-scoped foreign
+  keys, the `CHECK` asserting the same nanodollar bound the domain asserts, and the conditional
+  single-statement debit. That work needs live PostgreSQL on 4165 and will be coordinated with the
+  other session before it runs.
