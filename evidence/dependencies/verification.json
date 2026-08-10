@@ -1,7 +1,7 @@
 {
   "evidence": {
     "command": "node tooling/dependencies/verify.mjs",
-    "generatedAt": "2026-08-10T20:05:47.309Z",
+    "generatedAt": "2026-08-10T20:21:20.097Z",
     "generator": "tooling/dependencies/verify.mjs",
     "inputs": [
       {
@@ -74,7 +74,7 @@
       },
       {
         "path": "tooling/dependencies/register.json",
-        "sha256": "7d278e8fb9368131ae0c58f20eb40736aa8f7e093507609d18446129ba484e5e"
+        "sha256": "772783b1e4b6a33a4cb97f8c20dcd89b7fe904b99242ca10688dac027ef8c461"
       },
       {
         "path": "tooling/dependencies/register.schema.json",
@@ -119,15 +119,15 @@
   "outputs": [
     {
       "path": "evidence/dependencies/dependency-metadata.json",
-      "sha256": "551da5bb11434c996f40ff37ec1a3252fd5da7a3ad9462a1bf32ad4a8d703a2f"
+      "sha256": "7c1b8a908411136e6641a45e19ce80eab9b16ae41b0681f5afb71cca30f0b9e2"
     },
     {
       "path": "evidence/dependencies/npm-audit-production.json",
-      "sha256": "dfb834bdaeb1adbb75cbfb7543ea440a725bcbafdf2781b4308a909edef35150"
+      "sha256": "bf0d977420aff7fcb88c1f5b20b59864e42c7173ebc9bdbfebaf4db81e578121"
     },
     {
       "path": "evidence/dependencies/npm-audit-full.json",
-      "sha256": "4f144aff95ec780d5467f58b6996e6e841318b7044b2f95ed80178a054bc2ae5"
+      "sha256": "e50b4a85317aa0d6a4a7ccad26013840267f0611ae4718a1c5fdd8c5db1912f3"
     }
   ],
   "result": {
@@ -151,8 +151,8 @@
   },
   "timeSensitive": {
     "auditObservedAt": {
-      "fullLockfile": "2026-08-10T20:05:47.309Z",
-      "productionOmitDev": "2026-08-10T20:05:47.305Z"
+      "fullLockfile": "2026-08-10T20:21:20.097Z",
+      "productionOmitDev": "2026-08-10T20:21:19.653Z"
     },
     "statement": "Audit results and native tool paths are observations from this run and must be regenerated for a later claim."
   }

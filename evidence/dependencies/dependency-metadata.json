@@ -1,7 +1,7 @@
 {
   "evidence": {
     "command": "node tooling/dependencies/verify.mjs",
-    "generatedAt": "2026-08-10T20:05:47.309Z",
+    "generatedAt": "2026-08-10T20:21:20.097Z",
     "generator": "tooling/dependencies/verify.mjs",
     "inputs": [
       {
@@ -74,7 +74,7 @@
       },
       {
         "path": "tooling/dependencies/register.json",
-        "sha256": "7d278e8fb9368131ae0c58f20eb40736aa8f7e093507609d18446129ba484e5e"
+        "sha256": "772783b1e4b6a33a4cb97f8c20dcd89b7fe904b99242ca10688dac027ef8c461"
       },
       {
         "path": "tooling/dependencies/register.schema.json",
@@ -612,7 +612,7 @@
           "--without-zlib",
           "make -j2"
         ],
-        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes exact binary versions."
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, validates every archive member path, discards ambient build selectors, and builds inside the repository cache. It then probes the exact postgres version and asserts that every executable dev:preflight resolves is present: createdb, initdb, pg_isready, postgres and psql."
       },
       "removalBoundary": "Replace only through a ledger datastore ADR, schema/data migration and rollback, backup/restore proof, and full invariant/concurrency re-proof.",
       "review": {
@@ -715,11 +715,13 @@
         "source": "https://download.redis.io/releases/redis-8.10.0.tar.gz",
         "sourceSha256": "f1baa4b28befd417aa6577ebeedde9e9fc7814cfcc299b2a6d2fd99ef7420a6c",
         "buildFlags": [
-          "make -j2",
+          "make -C src -j2",
           "BUILD_TLS=no",
-          "MALLOC=libc"
+          "MALLOC=libc",
+          "redis-server",
+          "redis-cli"
         ],
-        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes server and CLI versions."
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, validates every archive member path, discards ambient build selectors, and builds inside the repository cache. Only the two admitted binaries are built: the Redis 8 default goal routes through scripts/build.sh, which additionally builds every bundled module under modules/*/src and fails on RedisSearch because no Rust toolchain is provisioned. Install copies the two binaries rather than invoking the upstream install target, which depends on `all` and would also build the sentinel, benchmark and test modules. After install the provisioner asserts the provisioned tree contains exactly bin/redis-server and bin/redis-cli, refuses any .so, and probes both command versions."
       },
       "removalBoundary": "Remove cache/coordination use or replace behind the deny-safe coordination boundary; no replacement may authorize money.",
       "review": {
@@ -1582,8 +1584,8 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 275375,
-          "files": 59
+          "bytes": 414282,
+          "files": 93
         },
         "gypfile": null,
         "libc": null,
@@ -1680,8 +1682,8 @@
         "executableEntryPointPackages": [],
         "installScriptPackages": [],
         "installedArtifactFootprint": {
-          "bytes": 739155,
-          "files": 197,
+          "bytes": 878062,
+          "files": 231,
           "uniqueArtifactRoots": 15
         },
         "lifecycleScriptPackages": [],
@@ -6449,7 +6451,7 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 118050,
+          "bytes": 118902,
           "files": 12
         },
         "gypfile": null,
@@ -6500,8 +6502,8 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 275375,
-          "files": 59
+          "bytes": 414282,
+          "files": 93
         },
         "gypfile": null,
         "libc": null,
@@ -6653,7 +6655,7 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 117808,
+          "bytes": 118660,
           "files": 12
         },
         "gypfile": null,
@@ -21360,8 +21362,8 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 275375,
-          "files": 59
+          "bytes": 414282,
+          "files": 93
         },
         "gypfile": null,
         "libc": null,
@@ -21520,7 +21522,7 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 118050,
+          "bytes": 118902,
           "files": 12
         },
         "gypfile": null,
@@ -21629,7 +21631,7 @@
         "bundledDependencies": null,
         "cpu": null,
         "footprint": {
-          "bytes": 117808,
+          "bytes": 118660,
           "files": 12
         },
         "gypfile": null,

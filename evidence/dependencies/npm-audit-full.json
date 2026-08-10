@@ -1,7 +1,7 @@
 {
   "evidence": {
     "command": "node tooling/dependencies/verify.mjs",
-    "generatedAt": "2026-08-10T20:05:47.309Z",
+    "generatedAt": "2026-08-10T20:21:20.097Z",
     "generator": "tooling/dependencies/verify.mjs",
     "inputs": [
       {
@@ -74,7 +74,7 @@
       },
       {
         "path": "tooling/dependencies/register.json",
-        "sha256": "7d278e8fb9368131ae0c58f20eb40736aa8f7e093507609d18446129ba484e5e"
+        "sha256": "772783b1e4b6a33a4cb97f8c20dcd89b7fe904b99242ca10688dac027ef8c461"
       },
       {
         "path": "tooling/dependencies/register.schema.json",
@@ -114,7 +114,7 @@
   },
   "audit": {
     "command": "npm audit --json --ignore-scripts --registry=https://registry.npmjs.org/",
-    "completedAt": "2026-08-10T20:05:47.309Z",
+    "completedAt": "2026-08-10T20:21:20.097Z",
     "environmentIsolation": {
       "inheritedEnvironmentVariables": [],
       "npmConfigFiles": "fresh repository-local scratch files with no auth data; user config contains only the fixed registry",
@@ -146,7 +146,7 @@
       "vulnerabilities": {}
     },
     "scope": "full-lockfile",
-    "startedAt": "2026-08-10T20:05:45.864Z",
+    "startedAt": "2026-08-10T20:21:17.516Z",
     "timeSensitive": true
   },
   "limitation": "This point-in-time npm registry advisory snapshot is not a maintenance review, historical security review, reachability proof, or prediction of future advisory status."

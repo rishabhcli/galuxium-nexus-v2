@@ -147,7 +147,7 @@
         "source": "https://ftp.postgresql.org/pub/source/v16.14/postgresql-16.14.tar.bz2",
         "sourceSha256": "f6d077142737920858ce958ccdb75c6ee137a63b5b0853c70693d401ac7e3471",
         "buildFlags": ["--without-icu", "--without-readline", "--without-zlib", "make -j2"],
-        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes exact binary versions."
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, validates every archive member path, discards ambient build selectors, and builds inside the repository cache. It then probes the exact postgres version and asserts that every executable dev:preflight resolves is present: createdb, initdb, pg_isready, postgres and psql."
       }
     },
     {
@@ -198,8 +198,14 @@
         "downloadHelper": "tooling/bounded-download.mjs",
         "source": "https://download.redis.io/releases/redis-8.10.0.tar.gz",
         "sourceSha256": "f1baa4b28befd417aa6577ebeedde9e9fc7814cfcc299b2a6d2fd99ef7420a6c",
-        "buildFlags": ["make -j2", "BUILD_TLS=no", "MALLOC=libc"],
-        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes server and CLI versions."
+        "buildFlags": [
+          "make -C src -j2",
+          "BUILD_TLS=no",
+          "MALLOC=libc",
+          "redis-server",
+          "redis-cli"
+        ],
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, validates every archive member path, discards ambient build selectors, and builds inside the repository cache. Only the two admitted binaries are built: the Redis 8 default goal routes through scripts/build.sh, which additionally builds every bundled module under modules/*/src and fails on RedisSearch because no Rust toolchain is provisioned. Install copies the two binaries rather than invoking the upstream install target, which depends on `all` and would also build the sentinel, benchmark and test modules. After install the provisioner asserts the provisioned tree contains exactly bin/redis-server and bin/redis-cli, refuses any .so, and probes both command versions."
       }
     }
   ],
