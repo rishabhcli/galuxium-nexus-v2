@@ -467,3 +467,78 @@ repository remains **not yet in production**.
   keys, the `CHECK` asserting the same nanodollar bound the domain asserts, and the conditional
   single-statement debit. That work needs live PostgreSQL on 4165 and will be coordinated with the
   other session before it runs.
+
+## 2026-08-10T20:26:00Z — Canonical verifier green from a clean checkout on Linux CI
+
+### What changed in verifiable state
+
+Every one of the five red gates recorded in the 2026-08-10T15:29:57Z audit is now green, verified
+from a **clean checkout** on the Linux runner out of a pushed commit rather than from a working
+tree. [GitHub Actions run 31428413658](https://github.com/rishabhcli/galuxium-nexus-v2/actions/runs/31428413658)
+at commit `8c2a8ab` succeeded on every step, including the two that had never passed:
+
+- `Build exact-version native tools from SHA-256-verified source` — was failing at
+  `ERROR: make build finished with module failure(s): redisearch`.
+- `Run the canonical full verifier` — `[verify-all] PASS Tier 0 static, unit/property, build,
+  runtime health, integration, and browser accessibility gates.`
+- `Assert verification did not rewrite or add repository files` — so the verifier is non-mutating.
+
+Verifier stage output from that run:
+
+| Stage | Result |
+|---|---|
+| `toolchain:check` | pass |
+| `check` (format, lint, typecheck, boundaries, dependencies) | pass |
+| `test` | 32 files, 261 tests passed |
+| `build` | pass |
+| `test:integration` | 24 tests passed |
+| `test:e2e` | 2 passed; `[playwright-owned] PASS Playwright started and stopped its exact repository-owned webServer topology run=873f40f5-a7ec-40ad-8aa2-8d784172f932` |
+| `dev:health` | `PASS local development topology is ready on 127.0.0.1:4160-4169` |
+
+The Playwright ownership proof therefore holds on Linux as well as macOS, on a different PID
+allocation regime than the one the original race was found on.
+
+Independently, the same commit tree was verified from a **local clean-checkout `git worktree`** for
+the port-free gates: `toolchain:check`, `check`, `test` (32 files, 261 tests) and `build` all
+passed there with no repository mutation. Runtime gates were not re-run locally because the shared
+4160-4169 block was handed to the concurrent session for its Tier 2 PostgreSQL constraint work.
+
+### Correction to the previous entry
+
+The previous entry listed "no clean-checkout `verify-all` pass has been recorded yet" and the
+Linux-only ownership test failure as open. Both are now closed by the run above. The
+`format:check` failure noted there was the concurrent session's uncommitted `packages/ledger`
+files; that session has since committed them (`babbe0f`) and `prettier --check .` is clean
+repository-wide.
+
+### Known gap recorded rather than fixed
+
+`loadVerifiedOwnershipRecords({removeStale:true})` and the pre-signal check in `stopOwnedServices`
+still treat only `not-running` as a stale ownership record. Any other drift reason throws, so a
+record whose PID was reused by an unrelated process wedges `dev:up` and `dev:down` until the
+`.dev/pids/<service>.{pid,meta.json}` files are removed by hand. The `waitForVerifiedExit` fix
+removed the path that created drifted records during normal shutdown, so the remaining exposure is
+drift arising while no shutdown runs — a crash, or a machine-wide PID wrap. Auto-deleting on drift
+is deliberately not done: safe recovery has to distinguish "nothing is listening, so self-heal"
+from "something else holds our port, so refuse", and `listeners.mjs` imports `ownership.mjs`, so
+that check cannot live inside the ownership module without an import cycle. Fail-closed is the
+safer posture and its diagnosis names the exact PID and reason, so it stands, with the ergonomic
+cost recorded here rather than discovered later.
+
+### Status of the actual goal
+
+Tier 0's executable contract is now green and reproducible, which is a **precondition**, not
+progress toward §5. Unchanged and still true: every release gate G1-G6 is **unavailable** because
+no monetary reservation path, ledger schema, tenant authorization, operational stack or admin
+ledger view exists yet. No §5 clause is satisfied. There is no deployment, no real provider
+credential, no real spend, no real user, no backup or restore drill, no rollback drill and no soak
+window. The repository is **not yet in production**.
+
+### §10.1 next selected
+
+With `dev:health` green and no failing gate, the highest remaining item is §10.1(6): a claim with
+no regenerating command. Audit every number and capability claim in `README.md`,
+`SUPPORT_MATRIX.md`, `docs/` and the register against a committed command that regenerates it, and
+either regenerate or withdraw each one. Tier 0's remaining dependency-admission reviews
+(live upstream, historical advisory, legal obligation, platform support, measured runtime cost)
+follow as §10.1(7).
