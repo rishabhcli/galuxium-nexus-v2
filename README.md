@@ -10,7 +10,7 @@ Tier 0 foundation work is in progress. The repository contains an exact-version 
 
 The budget ledger, pricing and reservation state machine, authenticated provider dispatch, reconciliation workflow, production deployment, and release evidence are not implemented. **This repository is not yet in production.** A passing local health check must not be interpreted as product or release readiness.
 
-The latest audit is recorded in [PROGRESS.md](./PROGRESS.md). At that checkpoint, the seven-service local topology passed `make dev-health`, while the canonical verifier and Linux CI were still failing. Treat the journal's newest entry and the linked run output as the status source; do not infer completion from an older journal entry or a service responding on a port.
+The latest audit is recorded in [PROGRESS.md](./PROGRESS.md). At that checkpoint the canonical verifier passed from a clean checkout on the Linux runner out of a pushed commit — [Actions run 31428413658](https://github.com/rishabhcli/galuxium-nexus-v2/actions/runs/31428413658) — green on native provisioning, bootstrap, the full verifier, and the assertion that verification did not rewrite or add repository files. That is the Tier 0 executable contract working and nothing more: every release gate G1-G6 remains unavailable because the monetary domain does not exist yet. Treat the journal's newest entry and the linked run output as the status source; do not infer completion from an older journal entry, from a green verifier, or from a service responding on a port.
 
 | Document | Role |
 |---|---|
