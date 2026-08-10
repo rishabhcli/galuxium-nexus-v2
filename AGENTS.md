@@ -15,6 +15,7 @@ Before planning or editing, read in this order:
 2. `WINNING_IDEA.md` for the selected concept, technical core, validation, and scope.
 3. `README.md` for the production product and operating contract.
 4. This file for implementation discipline.
+5. `GOAL.md` for the standing goal-mode contract: the parallel-execution and dev-server port block (§0A), what "production has occurred" means here (§5), the Tier 0-13 ladder (§6), the perpetual epoch engine (§7), the ratchet table (§8), and the work-selection algorithm (§10). `GOAL.md` governs *how long* the work runs and *in what order*; this file governs *how* it is built. Neither overrides `HACKATHON.md`.
 
 Do not infer missing requirements from another hackathon repository. If two documents conflict, stop the affected implementation path, identify the exact conflict, and resolve it in an ADR or user instruction. Do not silently choose the easier interpretation.
 

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "noEmit": true,
+    "tsBuildInfoFile": "./.dev/cache/root.tsbuildinfo"
+  },
+  "files": ["playwright.config.ts", "vitest.config.ts"],
+  "include": ["tests/**/*.ts"],
+  "references": [
+    {
+      "path": "./packages/observability"
+    },
+    {
+      "path": "./packages/ledger"
+    },
+    {
+      "path": "./services/gateway"
+    },
+    {
+      "path": "./services/reconciler"
+    },
+    {
+      "path": "./services/fake-provider"
+    },
+    {
+      "path": "./services/metrics"
+    },
+    {
+      "path": "./apps/admin"
+    }
+  ]
+}

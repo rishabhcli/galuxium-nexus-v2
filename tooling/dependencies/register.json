@@ -1,0 +1,1394 @@
+{
+  "$schema": "./register.schema.json",
+  "schemaVersion": 1,
+  "policy": {
+    "admissionStatus": "tier-0-recorded-release-admission-pending",
+    "reason": "Every direct row explicitly records exact-artifact licence evidence, maintenance status, point-in-time security evidence/history limitation, native/binary implications, measured local installed footprint evidence, exposure, and a removal boundary. Full release admission remains pending where the row says a live upstream, legal-obligation, historical advisory, platform, or runtime/bundle review is not yet established.",
+    "currentAuditEvidence": [
+      "evidence/dependencies/npm-audit-production.json",
+      "evidence/dependencies/npm-audit-full.json"
+    ],
+    "metadataEvidence": "evidence/dependencies/dependency-metadata.json"
+  },
+  "nativeTools": [
+    {
+      "name": "Node.js",
+      "expectedVersion": "24.18.0",
+      "role": "Pinned production runtime and repository toolchain",
+      "commands": ["node"],
+      "admissionStatus": "tier-0-recorded-release-admission-pending",
+      "review": {
+        "license": {
+          "status": "local-binary-or-cli-identity-recorded-distribution-obligations-pending",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools command hashes, paths, and runtime artifact metadata"
+        },
+        "maintenance": {
+          "status": "undetermined-live-upstream-review-pending",
+          "timeSensitive": true,
+          "evidence": "The exact local/provisioned version and source input digest are recorded; live upstream cadence, support, and EOL status remain undetermined."
+        },
+        "securityHistory": {
+          "status": "not-covered-by-npm-audit-native-advisory-review-pending",
+          "timeSensitive": true,
+          "evidence": "evidence/dependencies/dependency-metadata.json exact native version/path/SHA-256; a native upstream advisory source was not queried by this local-artifact slice"
+        },
+        "scriptsAndNative": {
+          "status": "exact-command-version-path-sha256-and-dynamic-linkage-recorded",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools"
+        },
+        "cost": {
+          "status": "installed-artifact-and-command-bytes-files-recorded-runtime-resource-cost-unmeasured",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools artifactEvidence footprint and commands[].bytes",
+          "measured": "Installed artifact/prefix bytes and file counts plus every required command byte size on the evidence platform."
+        }
+      },
+      "removalBoundary": "Replace the runtime wrapper, engines/package-manager contract, CI image, and every deployable artifact together, then re-run all gates.",
+      "provenance": {
+        "kind": "node-runtime-archive",
+        "input": "tooling/pinned-runtime.mjs",
+        "downloadHelper": "tooling/bounded-download.mjs",
+        "source": "https://nodejs.org/dist/v24.18.0/",
+        "verification": "Bootstrap enforces the selected platform archive Content-Length ceiling and SHA-256 before extraction.",
+        "artifacts": {
+          "darwin-arm64": {
+            "archive": "node-v24.18.0-darwin-arm64.tar.gz",
+            "sha256": "e1a97e14c99c803e96c7339403282ea05a499c32f8d83defe9ef5ec66f979ed1"
+          },
+          "darwin-x64": {
+            "archive": "node-v24.18.0-darwin-x64.tar.gz",
+            "sha256": "dfd0dbd3e721503434df7b7205e719f61b3a3a31b2bcf9729b8b91fea240f080"
+          },
+          "linux-arm64": {
+            "archive": "node-v24.18.0-linux-arm64.tar.xz",
+            "sha256": "58c9520501f6ae2b52d5b210444e24b9d0c029a58c5011b797bc1fe7105886f6"
+          },
+          "linux-x64": {
+            "archive": "node-v24.18.0-linux-x64.tar.xz",
+            "sha256": "55aa7153f9d88f28d765fcdad5ae6945b5c0f98a36881703817e4c450fa76742"
+          }
+        }
+      }
+    },
+    {
+      "name": "npm CLI",
+      "expectedVersion": "11.16.0",
+      "role": "Pinned workspace resolver, lifecycle-policy boundary, auditor, and task runner",
+      "commands": ["npm"],
+      "admissionStatus": "tier-0-recorded-release-admission-pending",
+      "review": {
+        "license": {
+          "status": "local-binary-or-cli-identity-recorded-distribution-obligations-pending",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools command hashes, paths, and runtime artifact metadata"
+        },
+        "maintenance": {
+          "status": "undetermined-live-upstream-review-pending",
+          "timeSensitive": true,
+          "evidence": "The exact local/provisioned version and source input digest are recorded; live upstream cadence, support, and EOL status remain undetermined."
+        },
+        "securityHistory": {
+          "status": "npm-current-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": "evidence/dependencies/npm-audit-full.json"
+        },
+        "scriptsAndNative": {
+          "status": "exact-command-version-path-sha256-and-dynamic-linkage-recorded",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools"
+        },
+        "cost": {
+          "status": "installed-artifact-and-command-bytes-files-recorded-runtime-resource-cost-unmeasured",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools artifactEvidence footprint and commands[].bytes",
+          "measured": "Installed artifact/prefix bytes and file counts plus every required command byte size on the evidence platform."
+        }
+      },
+      "removalBoundary": "Replace package-manager and lockfile semantics plus bootstrap/task/CI commands atomically, then regenerate dependency evidence.",
+      "provenance": {
+        "kind": "bundled-cli",
+        "input": "tooling/pinned-runtime.mjs",
+        "source": "Bundled inside the checksum-verified Node.js 24.18.0 distribution",
+        "verification": "The wrapper executes the npm CLI through the pinned Node binary and verifies exact npm 11.16.0."
+      }
+    },
+    {
+      "name": "PostgreSQL native distribution",
+      "expectedVersion": "16.14",
+      "role": "Authoritative local and integration ledger datastore",
+      "commands": ["postgres", "pg_ctl", "initdb", "psql", "pg_isready", "createdb"],
+      "admissionStatus": "tier-0-recorded-release-admission-pending",
+      "review": {
+        "license": {
+          "status": "local-binary-or-cli-identity-recorded-distribution-obligations-pending",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools command hashes, paths, and runtime artifact metadata"
+        },
+        "maintenance": {
+          "status": "undetermined-live-upstream-review-pending",
+          "timeSensitive": true,
+          "evidence": "The exact local/provisioned version and source input digest are recorded; live upstream cadence, support, and EOL status remain undetermined."
+        },
+        "securityHistory": {
+          "status": "not-covered-by-npm-audit-native-advisory-review-pending",
+          "timeSensitive": true,
+          "evidence": "evidence/dependencies/dependency-metadata.json exact native version/path/SHA-256; a native upstream advisory source was not queried by this local-artifact slice"
+        },
+        "scriptsAndNative": {
+          "status": "exact-command-version-path-sha256-and-dynamic-linkage-recorded",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools"
+        },
+        "cost": {
+          "status": "installed-artifact-and-command-bytes-files-recorded-runtime-resource-cost-unmeasured",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools artifactEvidence footprint and commands[].bytes",
+          "measured": "Installed artifact/prefix bytes and file counts plus every required command byte size on the evidence platform."
+        }
+      },
+      "removalBoundary": "Replace only through a ledger datastore ADR, schema/data migration and rollback, backup/restore proof, and full invariant/concurrency re-proof.",
+      "provenance": {
+        "kind": "source-built-native",
+        "input": "tooling/ci/provision-native.mjs",
+        "downloadHelper": "tooling/bounded-download.mjs",
+        "source": "https://ftp.postgresql.org/pub/source/v16.14/postgresql-16.14.tar.bz2",
+        "sourceSha256": "f6d077142737920858ce958ccdb75c6ee137a63b5b0853c70693d401ac7e3471",
+        "buildFlags": ["--without-icu", "--without-readline", "--without-zlib", "make -j2"],
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes exact binary versions."
+      }
+    },
+    {
+      "name": "Redis native distribution",
+      "expectedVersion": "8.10.0",
+      "role": "Local and integration cache and coordination service, never monetary authority",
+      "commands": ["redis-server", "redis-cli"],
+      "admissionStatus": "tier-0-recorded-release-admission-pending",
+      "review": {
+        "license": {
+          "status": "local-binary-or-cli-identity-recorded-distribution-obligations-pending",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools command hashes, paths, and runtime artifact metadata"
+        },
+        "maintenance": {
+          "status": "official-8.10.0-ga-observed-live-support-and-eol-review-pending",
+          "timeSensitive": true,
+          "evidence": [
+            "https://github.com/redis/redis/releases/tag/8.10.0",
+            "evidence/dependencies/dependency-metadata.json exact local/provisioned version, command identities, and source input digest"
+          ],
+          "limitation": "The official 8.10.0 General Availability release was observed, but live release cadence, support window, and EOL status remain undetermined."
+        },
+        "securityHistory": {
+          "status": "discovered-8.8.0-restore-rce-class-upgrade-disposition-recorded-broader-history-pending",
+          "timeSensitive": true,
+          "evidence": [
+            "https://github.com/redis/redis/releases/tag/8.8.1",
+            "https://github.com/RedisBloom/RedisBloom/pull/1048",
+            "https://github.com/redis/redis/releases/tag/8.10.0",
+            "evidence/dependencies/dependency-metadata.json exact native version/path/SHA-256"
+          ],
+          "limitation": "The official 8.8.1 release marked crafted RedisBloom/TDigest RESTORE payload out-of-bounds writes with potential remote code execution; RedisBloom pull request 1048 records that RDB/RESTORE hardening in RedisBloom v8.10.0 before the official Redis 8.10.0 GA release. The exact target is now 8.10.0. This dispositions that discovered superseded-version issue only; it is not a complete native advisory history or a claim about future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-command-version-path-sha256-and-dynamic-linkage-recorded",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools"
+        },
+        "cost": {
+          "status": "installed-artifact-and-command-bytes-files-recorded-runtime-resource-cost-unmeasured",
+          "evidence": "evidence/dependencies/dependency-metadata.json nativeTools artifactEvidence footprint and commands[].bytes",
+          "measured": "Installed artifact/prefix bytes and file counts plus every required command byte size on the evidence platform."
+        }
+      },
+      "removalBoundary": "Remove cache/coordination use or replace behind the deny-safe coordination boundary; no replacement may authorize money.",
+      "provenance": {
+        "kind": "source-built-native",
+        "input": "tooling/ci/provision-native.mjs",
+        "downloadHelper": "tooling/bounded-download.mjs",
+        "source": "https://download.redis.io/releases/redis-8.10.0.tar.gz",
+        "sourceSha256": "f1baa4b28befd417aa6577ebeedde9e9fc7814cfcc299b2a6d2fd99ef7420a6c",
+        "buildFlags": ["make -j2", "BUILD_TLS=no", "MALLOC=libc"],
+        "verification": "Provisioner bounds Content-Length, verifies SHA-256 before extraction, builds inside repository cache, then probes server and CLI versions."
+      }
+    }
+  ],
+  "managedArtifacts": [
+    {
+      "name": "Playwright-managed Chromium",
+      "managerPackage": "@playwright/test",
+      "managerVersion": "1.62.1",
+      "descriptor": "node_modules/playwright-core/browsers.json",
+      "cacheRoot": ".dev/cache/playwright",
+      "purpose": "Repository-owned Chromium engine for browser, accessibility, and end-to-end verification",
+      "exposure": "development-test",
+      "components": [
+        {
+          "name": "chromium",
+          "revision": "1234",
+          "browserVersion": "151.0.7922.34",
+          "cacheDirectory": "chromium-1234"
+        },
+        {
+          "name": "chromium-headless-shell",
+          "revision": "1234",
+          "browserVersion": "151.0.7922.34",
+          "cacheDirectory": "chromium_headless_shell-1234"
+        },
+        {
+          "name": "ffmpeg",
+          "revision": "1011",
+          "browserVersion": null,
+          "cacheDirectory": "ffmpeg-1011"
+        }
+      ],
+      "downloadBoundary": "The bootstrap command invokes the exactly locked Playwright CLI with PLAYWRIGHT_BROWSERS_PATH=.dev/cache/playwright and the chromium target. Browser download lifecycle scripts remain disabled during npm ci.",
+      "removalBoundary": "Remove the Playwright and axe Playwright direct dependencies, browser and accessibility suites/configuration, and the explicit bootstrap browser-install step; no production service or domain package may import this artifact.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending",
+      "review": {
+        "license": {
+          "status": "installed-notice-and-license-files-hashed-obligation-review-pending",
+          "evidence": "evidence/dependencies/dependency-metadata.json managedArtifacts components[].hashedNativeExecutableNoticeAndMarkerFiles"
+        },
+        "maintenance": {
+          "status": "manager-descriptor-version-recorded-live-browser-support-review-pending",
+          "timeSensitive": true,
+          "evidence": "Exact manager version plus hashed Playwright browser descriptor revision/version metadata."
+        },
+        "securityHistory": {
+          "status": "not-covered-by-npm-audit-browser-advisory-history-undetermined",
+          "timeSensitive": true,
+          "limitation": "The npm audit covers the manager packages, not Chromium or FFmpeg binary advisory history.",
+          "evidence": [
+            "evidence/dependencies/npm-audit-full.json",
+            "evidence/dependencies/dependency-metadata.json managed artifact executable hashes and versions"
+          ]
+        },
+        "scriptsAndNative": {
+          "status": "exact-revision-version-executable-sha256-native-files-and-linkage-recorded",
+          "evidence": "evidence/dependencies/dependency-metadata.json managedArtifacts"
+        },
+        "cost": {
+          "status": "platform-installed-bytes-files-recorded-runtime-memory-and-ci-time-unmeasured",
+          "evidence": "evidence/dependencies/dependency-metadata.json managedArtifacts components[].footprint",
+          "measured": "Installed bytes and file counts for Chromium, headless shell, and FFmpeg on the evidence platform."
+        }
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "@axe-core/playwright",
+      "kind": "registry",
+      "expectedVersion": "4.12.1",
+      "expectedDeclaredLicense": "MPL-2.0",
+      "purpose": "Automated accessibility assertions at the Playwright browser boundary",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "4.12.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MPL-2.0",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script or direct native file is present. Its locked closure includes Playwright Core executable entry points and a shipped WASM artifact; managed Chromium is reviewed separately.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace accessibility integration assertions and their failure coverage, then remove the dependency; Playwright itself remains a separate boundary.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@eslint/js",
+      "kind": "registry",
+      "expectedVersion": "10.0.1",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Core JavaScript lint rules",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "10.0.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script, platform selector, or native artifact is present. The closure contains JavaScript command entry points only.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the JavaScript lint rule source in eslint.config.mjs and prove equivalent fail-closed checks before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@galuxium-nexus-v2/ledger",
+      "kind": "workspace",
+      "expectedVersion": "0.1.0",
+      "expectedDeclaredLicense": null,
+      "purpose": "First-party authoritative ledger capability consumed by service orchestrators",
+      "exposure": "server-runtime",
+      "expectedConsumers": [
+        {
+          "manifest": "services/gateway/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        },
+        {
+          "manifest": "services/reconciler/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": null,
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "first-party-code-not-a-registry-advisory-subject",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "npm audit covers the workspace transitive registry graph, not the security history of first-party source; repository security tests/scans remain the authority."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "First-party TypeScript workspace with no consumer install lifecycle script, platform selector, or native artifact. The pg closure is JavaScript and its optional pg-native peer is not locked or installed.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "server-runtime",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the first-party ledger contract only through an ADR and re-proof every monetary invariant, persistence migration, and service integration.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@galuxium-nexus-v2/observability",
+      "kind": "workspace",
+      "expectedVersion": "0.1.0",
+      "expectedDeclaredLicense": null,
+      "purpose": "First-party structured telemetry and redaction capability",
+      "exposure": "server-runtime",
+      "expectedConsumers": [
+        {
+          "manifest": "apps/admin/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        },
+        {
+          "manifest": "services/fake-provider/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        },
+        {
+          "manifest": "services/gateway/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        },
+        {
+          "manifest": "services/metrics/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        },
+        {
+          "manifest": "services/reconciler/package.json",
+          "section": "dependencies",
+          "spec": "0.1.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": null,
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "first-party-code-not-a-registry-advisory-subject",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "npm audit covers the workspace transitive registry graph, not the security history of first-party source; repository security tests/scans remain the authority."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "First-party TypeScript workspace with no consumer install lifecycle script, platform selector, or native artifact in its Zod closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "server-runtime",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the first-party telemetry/redaction contract across every consumer and re-run redaction, event-schema, and operations gates.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@playwright/test",
+      "kind": "registry",
+      "expectedVersion": "1.62.1",
+      "expectedDeclaredLicense": "Apache-2.0",
+      "purpose": "Browser end-to-end and user-outcome test runner",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "1.62.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "Apache-2.0",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script or direct native file. The closure contains Playwright Core WASM/CLI artifacts and optional Darwin fsevents install/native behavior; the downloaded Chromium family is a separate managed-artifact row.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the browser runner, E2E/accessibility suites/configuration, and managed browser bootstrap together; no production service imports it.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@types/node",
+      "kind": "registry",
+      "expectedVersion": "24.13.3",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Type declarations for the pinned Node.js runtime APIs",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "24.13.3"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "Declaration-only JavaScript package with no consumer install lifecycle script, platform selector, binary entry point, or native artifact in its closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace only with runtime-matched Node declarations and re-run strict typecheck/build on every workspace.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@types/pg",
+      "kind": "registry",
+      "expectedVersion": "8.21.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Type declarations for the PostgreSQL client boundary",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "8.21.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "Declaration-only direct artifact. Its closure contains JavaScript PostgreSQL protocol/type packages and no installed native artifact.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace only with pg-version-compatible declarations or upstream bundled types and re-run ledger type/integration tests.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "kind": "registry",
+      "expectedVersion": "4.1.10",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "V8 coverage collection and reporting for the Vitest suites",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "4.1.10"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script/native file. The Vite closure selects platform-specific Rolldown and Lightning CSS native bindings plus optional fsevents install/native behavior.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the coverage provider and regenerate equivalent coverage/mutation gate evidence before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "@vitest/eslint-plugin",
+      "kind": "registry",
+      "expectedVersion": "1.6.26",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Static enforcement of repository test conventions",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "1.6.26"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script/native file. Its Vitest/Vite closure selects platform-specific Rolldown and Lightning CSS native bindings plus optional fsevents install/native behavior.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace its test-specific static rules with equivalent fail-closed lint rules before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "dependency-cruiser",
+      "kind": "registry",
+      "expectedVersion": "18.1.1",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Fail-closed workspace ownership and import-boundary enforcement",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "18.1.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, or native artifact in the locked closure; it exposes JavaScript CLI entry points.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace boundary enforcement with an equivalent build-failing graph rule set before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "eslint",
+      "kind": "registry",
+      "expectedVersion": "10.8.1",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Repository JavaScript and TypeScript static analysis runner",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "10.8.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, or native artifact in the locked closure; it exposes a JavaScript CLI entry point.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the static-analysis runner and all configured safety rules with an equal-or-stronger committed gate.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "eslint-plugin-playwright",
+      "kind": "registry",
+      "expectedVersion": "2.11.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Static enforcement of Playwright test safety and reliability rules",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "2.11.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, binary entry point, or native artifact in the locked closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace its browser-test safety rules with equivalent build-failing checks before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "fast-check",
+      "kind": "registry",
+      "expectedVersion": "4.9.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Seeded property and state-machine test input generation",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "4.9.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, binary entry point, or native artifact in the locked closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace property/state-machine generation while preserving named seeds, case counts, shrinking, and invariant attack coverage.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "globals",
+      "kind": "registry",
+      "expectedVersion": "17.9.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Explicit JavaScript runtime global definitions for lint configuration",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "17.9.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, binary entry point, or native artifact in the locked closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Inline or replace the exact runtime global sets in lint configuration and re-run lint before removal.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "pg",
+      "kind": "registry",
+      "expectedVersion": "8.23.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "PostgreSQL protocol client at the authoritative ledger persistence boundary",
+      "exposure": "server-runtime",
+      "expectedConsumers": [
+        {
+          "manifest": "packages/ledger/package.json",
+          "section": "dependencies",
+          "spec": "8.23.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "JavaScript PostgreSQL protocol client with no consumer install lifecycle script or installed native artifact. Optional peer pg-native is not locked or installed and may not be enabled without a new admission row.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "server-runtime",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace behind packages/ledger persistence boundaries with an ADR, migration/rollback path, and full concurrency/integration re-proof.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "prettier",
+      "kind": "registry",
+      "expectedVersion": "3.9.6",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Deterministic repository formatting",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "3.9.6"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, or native artifact; it exposes a JavaScript CLI entry point.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the formatter and committed style contract atomically, then prove check mode is deterministic.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "redis",
+      "kind": "registry",
+      "expectedVersion": "6.2.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Redis protocol client for deny-safe cache and coordination boundaries",
+      "exposure": "server-runtime",
+      "expectedConsumers": [
+        {
+          "manifest": "services/gateway/package.json",
+          "section": "dependencies",
+          "spec": "6.2.0"
+        },
+        {
+          "manifest": "services/reconciler/package.json",
+          "section": "dependencies",
+          "spec": "6.2.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "JavaScript Redis protocol client with no consumer install lifecycle script, platform selector, binary entry point, or native artifact in its locked closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "server-runtime",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace only behind gateway/reconciler deny-safe cache and coordination seams; Redis may never become monetary authority.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "typescript",
+      "kind": "registry",
+      "expectedVersion": "6.0.3",
+      "expectedDeclaredLicense": "Apache-2.0",
+      "purpose": "Strict TypeScript compiler and project-reference build engine",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "6.0.3"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "Apache-2.0",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, or native artifact; it exposes JavaScript tsc and tsserver entry points.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the compiler only with a full emitted-code, strictness, project-reference, runtime compatibility, and build gate review.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "typescript-eslint",
+      "kind": "registry",
+      "expectedVersion": "8.66.0",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Type-aware TypeScript parser and lint rule integration",
+      "exposure": "development-build",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "8.66.0"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script/native file. The closure is JavaScript and exposes compiler/lint command entry points.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-build",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the parser/rules together while preserving all type-aware lint failures.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "vite",
+      "kind": "registry",
+      "expectedVersion": "8.2.1",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Test transform and bundling infrastructure used by the Vitest toolchain",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "8.2.1"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script/native file. Its closure selects platform-specific Rolldown and Lightning CSS native bindings and optional fsevents install/native behavior.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the Vitest transform/bundle boundary and re-run unit, property, coverage, and browser suites.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "vitest",
+      "kind": "registry",
+      "expectedVersion": "4.1.10",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Deterministic unit and property test runner",
+      "exposure": "development-test",
+      "expectedConsumers": [
+        {
+          "manifest": "package.json",
+          "section": "devDependencies",
+          "spec": "4.1.10"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No direct consumer install lifecycle script/native file. Its Vite closure selects platform-specific Rolldown and Lightning CSS native bindings plus optional fsevents install/native behavior.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "development-test",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace the test runner while preserving seeded execution, coverage, failure semantics, and every named gate.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    },
+    {
+      "name": "zod",
+      "kind": "registry",
+      "expectedVersion": "4.4.3",
+      "expectedDeclaredLicense": "MIT",
+      "purpose": "Runtime validation at configuration, service, provider, and telemetry boundaries",
+      "exposure": "server-runtime",
+      "expectedConsumers": [
+        {
+          "manifest": "packages/observability/package.json",
+          "section": "dependencies",
+          "spec": "4.4.3"
+        },
+        {
+          "manifest": "services/fake-provider/package.json",
+          "section": "dependencies",
+          "spec": "4.4.3"
+        },
+        {
+          "manifest": "services/gateway/package.json",
+          "section": "dependencies",
+          "spec": "4.4.3"
+        },
+        {
+          "manifest": "services/reconciler/package.json",
+          "section": "dependencies",
+          "spec": "4.4.3"
+        }
+      ],
+      "review": {
+        "license": {
+          "status": "exact-artifact-declaration-and-files-recorded-obligations-pending",
+          "declared": "MIT",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.license and artifact.licenseFiles"
+        },
+        "maintenance": {
+          "status": "undetermined-from-local-artifact",
+          "timeSensitive": true,
+          "evidence": "Exact installed version, manifest hash/repository metadata, and lockfile deprecation marker (including explicit null) are recorded; no live upstream cadence/support/EOL conclusion is inferred."
+        },
+        "securityHistory": {
+          "status": "current-registry-advisory-snapshot-recorded-historical-status-undetermined",
+          "timeSensitive": true,
+          "evidence": [
+            "evidence/dependencies/npm-audit-production.json",
+            "evidence/dependencies/npm-audit-full.json"
+          ],
+          "limitation": "Both sanitized npm audits currently return zero known advisories for the hashed lock input; this does not establish historical absence, reachability, or future status."
+        },
+        "scriptsAndNative": {
+          "status": "exact-local-metadata-and-locked-closure-recorded",
+          "implications": "No consumer install lifecycle script, platform selector, binary entry point, or native artifact in the locked closure.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.scripts, artifact.lifecycleScripts, artifact.nativeArtifacts, and transitiveImplications"
+        },
+        "cost": {
+          "status": "local-installed-footprint-recorded-runtime-and-bundle-cost-not-yet-measured",
+          "exposure": "server-runtime",
+          "measured": "Direct and unique transitive-closure installed bytes/files on the evidence platform.",
+          "evidence": "evidence/dependencies/dependency-metadata.json directDependencies artifact.footprint and transitiveImplications.installedArtifactFootprint"
+        }
+      },
+      "removalBoundary": "Replace runtime schemas atomically at every listed boundary and re-run malformed-input, refusal, contract, and integration suites.",
+      "admissionStatus": "tier-0-recorded-release-admission-pending"
+    }
+  ]
+}

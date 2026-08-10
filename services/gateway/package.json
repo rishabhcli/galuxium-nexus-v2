@@ -1,0 +1,27 @@
+{
+  "name": "@galuxium-nexus-v2/gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist/src"
+  ],
+  "main": "./dist/src/server.js",
+  "types": "./dist/src/server.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/server.d.ts",
+      "import": "./dist/src/server.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b --pretty false",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "dependencies": {
+    "@galuxium-nexus-v2/ledger": "0.1.0",
+    "@galuxium-nexus-v2/observability": "0.1.0",
+    "redis": "6.2.0",
+    "zod": "4.4.3"
+  }
+}

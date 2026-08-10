@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "target": "linux-x64 on the GitHub-hosted ubuntu-24.04 runner",
+  "claimBoundary": "PostgreSQL and Redis source archives are exact-version and SHA-256 verified, and ambient compiler/linker/configuration selectors are discarded. Compiler, linker, libc, and runner image revisions are observed but not pinned, so compiled binaries are not claimed to be bit-for-bit reproducible.",
+  "requiredCommands": [
+    {
+      "name": "ar",
+      "versionArguments": ["--version"]
+    },
+    {
+      "name": "cc",
+      "versionArguments": ["--version"]
+    },
+    {
+      "name": "make",
+      "versionArguments": ["--version"]
+    },
+    {
+      "name": "perl",
+      "versionArguments": ["--version"]
+    },
+    {
+      "name": "ranlib",
+      "versionArguments": ["--version"]
+    },
+    {
+      "name": "tar",
+      "versionArguments": ["--version"]
+    }
+  ]
+}

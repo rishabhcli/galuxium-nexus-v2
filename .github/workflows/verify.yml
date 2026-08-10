@@ -1,0 +1,64 @@
+name: Verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Exact-source Tier 0 foundation verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CI: true
+      NODE_OPTIONS: --throw-deprecation --unhandled-rejections=strict
+      NPM_CONFIG_ENGINE_STRICT: true
+      NPM_CONFIG_FUND: false
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.dev/cache/playwright
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up exact Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: npm
+          cache-dependency-path: package-lock.json
+          check-latest: false
+          node-version-file: .node-version
+
+      - name: Build exact-version native tools from SHA-256-verified source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tooling/ci/provision-native.mjs
+          printf '%s\n' "$PWD/.dev/cache/ci-native/postgresql-16.14/bin" >> "$GITHUB_PATH"
+          printf '%s\n' "$PWD/.dev/cache/ci-native/redis-8.10.0/bin" >> "$GITHUB_PATH"
+
+      - name: Bootstrap through make (runs npm ci --ignore-scripts internally)
+        run: make bootstrap
+
+      - name: Install Linux libraries for bootstrap-installed Chromium
+        run: node node_modules/@playwright/test/cli.js install-deps chromium
+
+      - name: Run the canonical full verifier
+        run: node tooling/run-npm.mjs run full-verify
+
+      - name: Assert verification did not rewrite or add repository files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --exit-code -- .
+          status=$(git status --porcelain=v1 --untracked-files=all)
+          if [[ -n "$status" ]]; then
+            printf '%s\n' "$status" >&2
+            exit 1
+          fi

@@ -1,0 +1,145 @@
+{
+  "evidence": {
+    "command": "node tooling/dependencies/verify.mjs",
+    "generatedAt": "2026-08-10T11:23:54.451Z",
+    "generator": "tooling/dependencies/verify.mjs",
+    "inputs": [
+      {
+        "path": ".npmrc",
+        "sha256": "47fb9fe042932934750d11a386220a066da46e451e707219c4e516c399049147"
+      },
+      {
+        "path": "apps/admin/package.json",
+        "sha256": "9b529eedecb57f6eb31058f3de8fb3013a0dec219721392a91a4146b308c6c87"
+      },
+      {
+        "path": "node_modules/playwright-core/browsers.json",
+        "sha256": "f306eed529599b1eaf2f8a85db9de2b23e1a3fe36c2b66434b7c9434fb627a99"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "1a452966f8c83210ba4e59dc02f1119420d1109bc77b0315fccff19ef1729376"
+      },
+      {
+        "path": "package.json",
+        "sha256": "ac7ccfb75b28efe134061951dc013fed94e31b51e1e19da0984e14812aba854c"
+      },
+      {
+        "path": "packages/ledger/package.json",
+        "sha256": "fdba1ae24ba7011c5a3793bd808ff82568e9fcda787e9baf4a78eb781772c9f3"
+      },
+      {
+        "path": "packages/observability/package.json",
+        "sha256": "69b6724d354a805ad7f9f3157a8b5d90bcd721a7c8a16cb03c1c0ec05df1568c"
+      },
+      {
+        "path": "services/fake-provider/package.json",
+        "sha256": "685c4859bd5e5ee4e09f0856a20d7ba80a7742dc870ae8c7da33e1a43382869a"
+      },
+      {
+        "path": "services/gateway/package.json",
+        "sha256": "bee3e572f437f9865cee2e27c08c81eb5251cc315bc44ec953afb81ee30b34cf"
+      },
+      {
+        "path": "services/metrics/package.json",
+        "sha256": "74e236421c4d039d06307937d67bbea9f75dd3e67d76f85198c7252117081968"
+      },
+      {
+        "path": "services/reconciler/package.json",
+        "sha256": "81d7e5fd71096b00531bd7d1c8b9aa1dd935fc88dd7c4917db638bb475efbbc2"
+      },
+      {
+        "path": "tooling/bootstrap.mjs",
+        "sha256": "93cd24a85dea6e229ced91bf487545730f0d83061468b3ff3ec68bc882c17aff"
+      },
+      {
+        "path": "tooling/bounded-download.mjs",
+        "sha256": "21eb3c7a29efa338a6f35f2f0f4ed624492a7eced231f00388e0c611dd98a331"
+      },
+      {
+        "path": "tooling/ci/native-toolchain.json",
+        "sha256": "513c53d085ddbc069e7083566c681504469c203d0e47e598c6448ce17ed2c199"
+      },
+      {
+        "path": "tooling/ci/provision-native.mjs",
+        "sha256": "b3ef62093447851bfc531741170ad24c5fe281fb8db87cdf65b365d11dada3c2"
+      },
+      {
+        "path": "tooling/dependencies/evidence-paths.mjs",
+        "sha256": "0f6d21d61a3dfa963dc1bbcf152892e4a5622c725799b4438d1d427206c75007"
+      },
+      {
+        "path": "tooling/dependencies/evidence-paths.test.mjs",
+        "sha256": "7a6039029ead298b5c5ce877f4b51159a22e5787567af40df76ce5ce7f2961b5"
+      },
+      {
+        "path": "tooling/dependencies/register.json",
+        "sha256": "7d278e8fb9368131ae0c58f20eb40736aa8f7e093507609d18446129ba484e5e"
+      },
+      {
+        "path": "tooling/dependencies/register.schema.json",
+        "sha256": "c545b32099c59f78c66864662459d8be3c8d5f84233e76733caa6d8f305ae2e3"
+      },
+      {
+        "path": "tooling/dependencies/schema-validator.mjs",
+        "sha256": "2cf339500ca35a0961fe79e510e97802a2f4c825d94068ccf49b080ecce4dc62"
+      },
+      {
+        "path": "tooling/dependencies/schema-validator.test.mjs",
+        "sha256": "f3caf66d309d76f0cee45cb4efc37b43a0688f01c696abbbafc43be2ff287729"
+      },
+      {
+        "path": "tooling/dependencies/verify.mjs",
+        "sha256": "7f0ae3cde8d6e8e66bb458e77325ffea06846f172616bdc88be8f01d2ebd30d0"
+      },
+      {
+        "path": "tooling/pinned-runtime.mjs",
+        "sha256": "09b385e6d19756058fd5ed16ae3b73ec6d5053cedb557cbdc31fca8d463786cd"
+      }
+    ],
+    "schemaVersion": 1,
+    "seed": {
+      "applicability": "not-applicable",
+      "reason": "Dependency metadata extraction and npm audit invocation use no randomized operation.",
+      "value": null
+    }
+  },
+  "audit": {
+    "command": "npm audit --json --ignore-scripts --omit=dev --registry=https://registry.npmjs.org/",
+    "completedAt": "2026-08-10T11:23:53.893Z",
+    "environmentIsolation": {
+      "inheritedEnvironmentVariables": [],
+      "npmConfigFiles": "fresh repository-local scratch files with no auth data; user config contains only the fixed registry",
+      "persistedRawStdout": false,
+      "persistedStderr": false,
+      "registry": "https://registry.npmjs.org/"
+    },
+    "exitCode": 0,
+    "npmAudit": {
+      "auditReportVersion": 2,
+      "metadata": {
+        "dependencies": {
+          "dev": 223,
+          "optional": 28,
+          "peer": 0,
+          "peerOptional": 0,
+          "prod": 36,
+          "total": 259
+        },
+        "vulnerabilities": {
+          "critical": 0,
+          "high": 0,
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "total": 0
+        }
+      },
+      "vulnerabilities": {}
+    },
+    "scope": "production-omit-dev",
+    "startedAt": "2026-08-10T11:23:38.185Z",
+    "timeSensitive": true
+  },
+  "limitation": "This point-in-time npm registry advisory snapshot is not a maintenance review, historical security review, reachability proof, or prediction of future advisory status."
+}

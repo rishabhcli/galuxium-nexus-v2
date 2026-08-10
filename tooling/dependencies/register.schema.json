@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Galuxium Nexus V2 dependency admission register",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "policy", "nativeTools", "managedArtifacts", "dependencies"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["admissionStatus", "reason", "currentAuditEvidence", "metadataEvidence"],
+      "properties": {
+        "admissionStatus": { "const": "tier-0-recorded-release-admission-pending" },
+        "reason": { "type": "string", "minLength": 1 },
+        "currentAuditEvidence": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^evidence/dependencies/" }
+        },
+        "metadataEvidence": { "type": "string", "pattern": "^evidence/dependencies/" }
+      }
+    },
+    "nativeTools": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/nativeTool" }
+    },
+    "managedArtifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/managedArtifact" }
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dependency" }
+    }
+  },
+  "$defs": {
+    "statusRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "minLength": 1 },
+        "timeSensitive": { "type": "boolean" },
+        "evidence": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          ]
+        },
+        "declared": { "type": ["string", "null"] },
+        "exposure": {
+          "enum": ["development-build", "development-test", "server-runtime"]
+        },
+        "implications": { "type": "string", "minLength": 1 },
+        "limitation": { "type": "string", "minLength": 1 },
+        "measured": { "type": "string", "minLength": 1 }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["license", "maintenance", "securityHistory", "scriptsAndNative", "cost"],
+      "properties": {
+        "license": { "$ref": "#/$defs/statusRecord" },
+        "maintenance": { "$ref": "#/$defs/statusRecord" },
+        "securityHistory": { "$ref": "#/$defs/statusRecord" },
+        "scriptsAndNative": { "$ref": "#/$defs/statusRecord" },
+        "cost": { "$ref": "#/$defs/statusRecord" }
+      }
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest", "section", "spec"],
+      "properties": {
+        "manifest": { "type": "string", "pattern": "package\\.json$" },
+        "section": {
+          "enum": ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies"]
+        },
+        "spec": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$" }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "kind",
+        "expectedVersion",
+        "expectedDeclaredLicense",
+        "purpose",
+        "exposure",
+        "expectedConsumers",
+        "review",
+        "removalBoundary",
+        "admissionStatus"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["registry", "workspace"] },
+        "expectedVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "expectedDeclaredLicense": { "type": ["string", "null"] },
+        "purpose": { "type": "string", "minLength": 1 },
+        "exposure": {
+          "enum": ["development-build", "development-test", "server-runtime"]
+        },
+        "expectedConsumers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/consumer" }
+        },
+        "review": { "$ref": "#/$defs/review" },
+        "removalBoundary": { "type": "string", "minLength": 1 },
+        "admissionStatus": { "const": "tier-0-recorded-release-admission-pending" }
+      }
+    },
+    "nativeTool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "expectedVersion",
+        "role",
+        "commands",
+        "admissionStatus",
+        "review",
+        "removalBoundary",
+        "provenance"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "expectedVersion": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "commands": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "admissionStatus": { "const": "tier-0-recorded-release-admission-pending" },
+        "review": { "$ref": "#/$defs/review" },
+        "removalBoundary": { "type": "string", "minLength": 1 },
+        "provenance": { "$ref": "#/$defs/nativeProvenance" }
+      }
+    },
+    "nodeArtifactIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["archive", "sha256"],
+      "properties": {
+        "archive": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "nodeRuntimeProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "input", "downloadHelper", "source", "verification", "artifacts"],
+      "properties": {
+        "kind": { "const": "node-runtime-archive" },
+        "input": { "const": "tooling/pinned-runtime.mjs" },
+        "downloadHelper": { "const": "tooling/bounded-download.mjs" },
+        "source": { "type": "string", "minLength": 1 },
+        "verification": { "type": "string", "minLength": 1 },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["darwin-arm64", "darwin-x64", "linux-arm64", "linux-x64"],
+          "properties": {
+            "darwin-arm64": { "$ref": "#/$defs/nodeArtifactIdentity" },
+            "darwin-x64": { "$ref": "#/$defs/nodeArtifactIdentity" },
+            "linux-arm64": { "$ref": "#/$defs/nodeArtifactIdentity" },
+            "linux-x64": { "$ref": "#/$defs/nodeArtifactIdentity" }
+          }
+        }
+      }
+    },
+    "bundledCliProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "input", "source", "verification"],
+      "properties": {
+        "kind": { "const": "bundled-cli" },
+        "input": { "const": "tooling/pinned-runtime.mjs" },
+        "source": { "type": "string", "minLength": 1 },
+        "verification": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceBuiltNativeProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "input",
+        "downloadHelper",
+        "source",
+        "sourceSha256",
+        "buildFlags",
+        "verification"
+      ],
+      "properties": {
+        "kind": { "const": "source-built-native" },
+        "input": { "const": "tooling/ci/provision-native.mjs" },
+        "downloadHelper": { "const": "tooling/bounded-download.mjs" },
+        "source": { "type": "string", "pattern": "^https://" },
+        "sourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "buildFlags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "verification": { "type": "string", "minLength": 1 }
+      }
+    },
+    "nativeProvenance": {
+      "oneOf": [
+        { "$ref": "#/$defs/nodeRuntimeProvenance" },
+        { "$ref": "#/$defs/bundledCliProvenance" },
+        { "$ref": "#/$defs/sourceBuiltNativeProvenance" }
+      ]
+    },
+    "managedComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "revision", "browserVersion", "cacheDirectory"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "revision": { "type": "string", "pattern": "^\\d+$" },
+        "browserVersion": { "type": ["string", "null"] },
+        "cacheDirectory": { "type": "string", "minLength": 1 }
+      }
+    },
+    "managedArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "managerPackage",
+        "managerVersion",
+        "descriptor",
+        "cacheRoot",
+        "purpose",
+        "exposure",
+        "components",
+        "downloadBoundary",
+        "removalBoundary",
+        "admissionStatus",
+        "review"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "managerPackage": { "type": "string", "minLength": 1 },
+        "managerVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+        },
+        "descriptor": { "type": "string", "minLength": 1 },
+        "cacheRoot": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "exposure": { "const": "development-test" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/managedComponent" }
+        },
+        "downloadBoundary": { "type": "string", "minLength": 1 },
+        "removalBoundary": { "type": "string", "minLength": 1 },
+        "admissionStatus": { "const": "tier-0-recorded-release-admission-pending" },
+        "review": { "$ref": "#/$defs/review" }
+      }
+    }
+  }
+}

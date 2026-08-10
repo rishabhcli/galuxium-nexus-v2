@@ -6,7 +6,9 @@
 
 ## Repository status
 
-Implementation has not started. The repository currently contains the authoritative product and competition specifications. This README defines the production target that future code must satisfy; it does not claim that planned commands or components already exist.
+Tier 0 foundation work is in progress. The repository now contains an exact-version TypeScript/npm workspace, executable ownership boundaries, a repository-owned loopback development topology, real dependency-backed readiness, structured redacted logs and metrics, and deterministic local/test failure injection. These surfaces establish an executable development contract only.
+
+The budget ledger, pricing and reservation state machine, authenticated provider dispatch, reconciliation workflow, production deployment, and release evidence are not implemented. **This repository is not yet in production.** A passing local health check must not be interpreted as product or release readiness.
 
 | Document | Authority |
 |---|---|
@@ -14,6 +16,7 @@ Implementation has not started. The repository currently contains the authoritat
 | [WINNING_IDEA.md](./WINNING_IDEA.md) | Selected concept, hard technical core, validation, build order, demo and risk analysis |
 | [README.md](./README.md) | Product contract, architecture, production and release expectations |
 | [AGENTS.md](./AGENTS.md) | Binding implementation rules for every coding agent working in this repository |
+| [GOAL.md](./GOAL.md) | Standing execution order, production definition, tier ladder, evidence protocol and port isolation contract |
 
 If these documents disagree, preserve the external requirements in HACKATHON.md, then the product intent in WINNING_IDEA.md, and resolve the conflict explicitly in an ADR instead of guessing.
 
@@ -155,7 +158,8 @@ Accessibility is a release gate, not a polish task. The production interface mus
 ├── apps/admin/
 ├── packages/observability/
 ├── tests/                    # Unit, property, integration, E2E, resilience
-├── docs/                     # ADRs, threat model, runbooks, evaluation
+├── adr/                      # Numbered architecture decisions
+├── docs/                     # Threat models, runbooks, dependency and evaluation records
 └── infra/                    # Reproducible deployment and environment policy
 ```
 
@@ -176,6 +180,31 @@ No commands are advertised as working until the corresponding toolchain is commi
 | `build` | Produce release artifacts from a clean checkout |
 | `run-local` | Start the complete local system or a documented production-equivalent subset |
 | `release-check` | Run all blocking gates, artifact/SBOM generation, and policy checks |
+
+The only supported dependency-install entry point is `make bootstrap`. It provisions the
+repository-pinned Node.js/npm runtime, runs immutable `npm ci --ignore-scripts`, and installs
+the exact local Playwright Chromium revision under `.dev/`. The committed `.npmrc` also denies
+npm lifecycle scripts by default. Direct `npm install`, direct `npm ci`, and global package
+binaries are not contributor workflows.
+
+The current macOS-arm64 evidence path additionally requires PostgreSQL `16.14` (`postgres`,
+`initdb`, `createdb`, `psql`, and `pg_isready`) and Redis `8.10.0` (`redis-server` and `redis-cli`)
+on `PATH`. `dev:preflight` refuses every version or missing-command mismatch; it never attaches to
+a shared daemon. The Linux CI workflow instead compiles those exact versions from committed
+SHA-256-verified source inputs and prepends only the repository-local build directories. Other
+operating-system/architecture provisioning remains unsupported rather than implicit.
+
+`make test-e2e` builds the checked-out sources, stops only verified repository-owned PIDs, and
+requires Playwright's committed `webServer` command to start the full topology from an empty port
+block. After the browser suite, the runner proves that Playwright tore down every listener and
+ownership record before restoring and health-checking the standing local topology. It cannot reuse
+a server left by a previous gate.
+
+The current Tier 0 command surface fails closed where later production gates do not exist.
+`make eval` exits unavailable until a committed domain-evaluation manifest and metrics exist;
+`make release-check` exits unavailable until artifact, SBOM, and all release gates are real.
+Neither refusal is a skipped or passing gate. `make verify-all` is currently the canonical local
+foundation verifier and explicitly does not claim release or production readiness.
 
 A new contributor should be able to move from a clean checkout to a verified local system without tribal knowledge.
 
