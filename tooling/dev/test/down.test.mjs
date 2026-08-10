@@ -80,17 +80,68 @@ describe('exact-owned shutdown', () => {
     expect(control.kill).not.toHaveBeenCalledWith(987_650, 'SIGKILL');
   });
 
-  it('fails closed without a second signal or attribution removal after identity drift', async () => {
+  // Replaces an earlier test that required identity drift *while waiting for
+  // exit* to fail closed and retain attribution. That requirement was proven
+  // invalid in practice: every non-owned reason means a different process now
+  // holds the PID, which is exactly the evidence that the recorded process
+  // exited. The old behaviour turned real successful shutdowns into
+  // DEV_DOWN_OWNERSHIP_CHANGED_WHILE_WAITING and left a stale record naming a
+  // PID owned by an unrelated process. Observed on a real `make test-e2e` run:
+  // "PID 11742 for admin changed identity while waiting for exact-owned exit",
+  // where `ps -p 11742` showed no process at all afterwards. The strictness that
+  // prevents harm — never signalling a PID that is not verifiably ours — is
+  // asserted by the two tests below instead.
+  it.each([
+    'birth-identity-changed',
+    'pid-reused',
+    'process-group-changed',
+    'kernel-birth-identity-changed',
+    'command-changed',
+  ])('treats %s while awaiting exit as proof the recorded process is gone', async (reason) => {
     const control = processControl();
     ownershipMocks.verifyOwnership
       .mockResolvedValueOnce({ owned: true })
-      .mockResolvedValueOnce({ owned: false, reason: 'birth-identity-changed' });
+      .mockResolvedValueOnce({ owned: false, reason });
 
-    await expect(stopOwnershipRecord(record(), { processControl: control })).rejects.toMatchObject({
-      code: 'DEV_DOWN_OWNERSHIP_CHANGED_WHILE_WAITING',
+    await expect(stopOwnershipRecord(record(), { processControl: control })).resolves.toMatchObject(
+      { forced: false, service: 'redis' },
+    );
+
+    // Exactly one signal: the PID is no longer ours, so a second signal could
+    // only ever reach an unrelated process.
+    expect(control.kill).toHaveBeenCalledExactlyOnceWith(987_650, 'SIGTERM');
+    expect(control.kill).not.toHaveBeenCalledWith(987_650, 'SIGINT');
+    expect(ownershipMocks.removeOwnershipRecord).toHaveBeenCalledWith('redis', {
+      supervisorConfigPath: '/test/supervisor.redis.json',
+    });
+  });
+
+  it('refuses to signal a PID whose identity drifted before the signal', async () => {
+    const control = processControl();
+    ownershipMocks.verifyOwnership.mockResolvedValue({
+      owned: false,
+      reason: 'birth-identity-changed',
     });
 
-    expect(control.kill).toHaveBeenCalledExactlyOnceWith(987_650, 'SIGTERM');
+    await expect(stopOwnershipRecord(record(), { processControl: control })).rejects.toMatchObject({
+      code: 'DEV_DOWN_OWNERSHIP_MISMATCH',
+    });
+
+    expect(control.kill).not.toHaveBeenCalled();
+    expect(ownershipMocks.removeOwnershipRecord).not.toHaveBeenCalled();
+  });
+
+  it('still reports a stuck process that stays exact-owned through both signals', async () => {
+    const control = processControl();
+    ownershipMocks.verifyOwnership.mockResolvedValue({ owned: true });
+
+    await expect(stopOwnershipRecord(record(), { processControl: control })).rejects.toMatchObject({
+      code: 'DEV_DOWN_PROCESS_STUCK',
+    });
+
+    expect(control.kill).toHaveBeenNthCalledWith(1, 987_650, 'SIGTERM');
+    expect(control.kill).toHaveBeenNthCalledWith(2, 987_650, 'SIGINT');
+    expect(control.kill).not.toHaveBeenCalledWith(987_650, 'SIGKILL');
     expect(ownershipMocks.removeOwnershipRecord).not.toHaveBeenCalled();
   });
 

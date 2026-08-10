@@ -21,23 +21,39 @@ const DEFAULT_PROCESS_CONTROL = Object.freeze({
   sleep: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
 });
 
+/**
+ * Waits until the recorded process is provably no longer running.
+ *
+ * Every non-owned verification reason establishes that the recorded process has
+ * exited, because each one describes a *different* process now occupying the
+ * PID: the start time moved beyond tolerance, the process group differs, the
+ * Linux kernel birth identity differs, or the command line no longer carries the
+ * birth-identity token injected at spawn. A live process cannot shed its own
+ * argv or change its start time, so "something else is at this PID" and "our
+ * process is gone" are the same observation.
+ *
+ * Treating those reasons as errors was a real defect: the tooling itself spawns
+ * short-lived `ps` and `lsof` children while polling, which churns through PIDs
+ * and makes reuse of a just-exited service PID likely. That turned a successful
+ * shutdown into DEV_DOWN_OWNERSHIP_CHANGED_WHILE_WAITING, left the ownership
+ * record behind, and failed the gate for a condition that was actually success.
+ *
+ * The strictness that matters is retained where it matters: `sendVerifiedSignal`
+ * still refuses to signal a PID that is not verifiably ours, so a reused PID can
+ * never receive a signal intended for a service.
+ */
 async function waitForVerifiedExit(record, timeoutMs, processControl) {
   const deadline = processControl.now() + timeoutMs;
-  while (processControl.now() < deadline) {
+  for (;;) {
     const verification = await verifyOwnership(record);
     if (!verification.owned) {
-      if (verification.reason === 'not-running') {
-        return true;
-      }
-      throw new DevContractError(
-        'DEV_DOWN_OWNERSHIP_CHANGED_WHILE_WAITING',
-        `PID ${String(record.pid)} for ${record.service} changed identity while waiting for exact-owned exit.`,
-        { reason: verification.reason },
-      );
+      return true;
+    }
+    if (processControl.now() >= deadline) {
+      return false;
     }
     await processControl.sleep(100);
   }
-  return false;
 }
 
 async function sendVerifiedSignal(record, signal, processControl) {

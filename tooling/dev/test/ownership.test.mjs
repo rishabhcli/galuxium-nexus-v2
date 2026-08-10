@@ -38,6 +38,42 @@ function missingFileError() {
   return Object.assign(new Error('missing test fixture'), { code: 'ENOENT' });
 }
 
+const LINUX_BOOT_ID = '3f2b8c14-9d5e-4a71-8b06-2c7d15e9f4a3';
+const LINUX_START_TICKS = '5551234';
+
+/**
+ * Builds a `/proc/<pid>/stat` line whose field 22 is the process start tick.
+ *
+ * The parser slices from just past the `)` that terminates the comm field, so
+ * the resulting array starts at field 3 and the start tick lands at index 19.
+ */
+function linuxStatLine(startTicks) {
+  const fieldsAfterComm = Array.from({ length: 40 }, (_, index) => String(index));
+  fieldsAfterComm[19] = startTicks;
+  return `${String(PID)} (node) ${fieldsAfterComm.join(' ')}\n`;
+}
+
+/**
+ * Models the two `/proc` reads that `linuxKernelBirthIdentity` performs.
+ *
+ * Without this, the mocked `readFile` resolved `undefined` for those paths and
+ * the identity suite crashed inside the kernel-identity probe on the Linux CI
+ * runner while passing on macOS, where the probe returns early. Every test here
+ * must observe the same behaviour on both platforms.
+ */
+async function readFileFixture(targetPath, records = new Map()) {
+  if (records.has(targetPath)) {
+    return records.get(targetPath);
+  }
+  if (targetPath === '/proc/sys/kernel/random/boot_id') {
+    return `${LINUX_BOOT_ID}\n`;
+  }
+  if (targetPath === `/proc/${String(PID)}/stat`) {
+    return linuxStatLine(LINUX_START_TICKS);
+  }
+  throw missingFileError();
+}
+
 function mockProcessInspection({
   command = SUPERVISOR_COMMAND,
   exitCode = 0,
@@ -87,15 +123,11 @@ function ownershipRecord({ argvNeedles = [SUPERVISOR_ENTRY] } = {}) {
 }
 
 function mockSingleRedisRecord(record) {
-  fsMocks.readFile.mockImplementation(async (targetPath) => {
-    if (targetPath === pidPath('redis')) {
-      return `${record.pid}\n`;
-    }
-    if (targetPath === metadataPath('redis')) {
-      return `${JSON.stringify(record)}\n`;
-    }
-    throw missingFileError();
-  });
+  const records = new Map([
+    [pidPath('redis'), `${record.pid}\n`],
+    [metadataPath('redis'), `${JSON.stringify(record)}\n`],
+  ]);
+  fsMocks.readFile.mockImplementation(async (targetPath) => readFileFixture(targetPath, records));
   fsMocks.lstat.mockRejectedValue(missingFileError());
   fsMocks.rm.mockResolvedValue(undefined);
 }
@@ -107,7 +139,9 @@ describe('ownership process identity', () => {
     filesystemMocks.atomicWrite.mockReset();
     fsMocks.lstat.mockReset();
     fsMocks.open.mockReset();
-    fsMocks.readFile.mockReset();
+    fsMocks.readFile
+      .mockReset()
+      .mockImplementation(async (targetPath) => readFileFixture(targetPath));
     fsMocks.rm.mockReset();
 
     commandMocks.findExecutable.mockResolvedValue('/bin/ps');
@@ -150,6 +184,21 @@ describe('ownership process identity', () => {
     await expect(verifyOwnership(ownershipRecord())).resolves.toMatchObject({
       owned: false,
       reason: 'birth-identity-changed',
+    });
+  });
+
+  it('refuses a PID whose recorded kernel birth identity no longer matches', async () => {
+    mockProcessInspection();
+    // Differs from the modelled Linux value and from the `undefined` a non-Linux
+    // host reports, so the refusal is observed identically on both platforms.
+    const record = {
+      ...ownershipRecord(),
+      kernelBirthIdentity: `linux:${LINUX_BOOT_ID}:${String(Number(LINUX_START_TICKS) + 1)}`,
+    };
+
+    await expect(verifyOwnership(record)).resolves.toMatchObject({
+      owned: false,
+      reason: 'kernel-birth-identity-changed',
     });
   });
 

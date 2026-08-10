@@ -30,7 +30,13 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run dev:e2e-server',
+    // Run the pinned Node binary directly rather than through `npm run`.
+    // Playwright's graceful shutdown signals the process it spawned; with an
+    // npm shim in between, npm's exit is not the topology's exit, so the runner
+    // could audit the port block while the server was still tearing down. This
+    // also guarantees the exact pinned runtime rather than whatever `node`
+    // resolves to on PATH inside the spawned shell.
+    command: `${JSON.stringify(process.execPath)} tooling/dev/e2e-server.mjs`,
     gracefulShutdown: { signal: 'SIGTERM', timeout: 30_000 },
     reuseExistingServer: false,
     stderr: 'pipe',
