@@ -178,3 +178,73 @@ The current source and dependency foundation fails closed across the independent
 - The healthy local topology can create false confidence: gateway and reconciler return `FOUNDATION_ONLY`, the ledger package performs health probes only, and the admin page has no monetary state.
 - The dependency evidence contains point-in-time advisory observations, not complete historical security or legal admission.
 - No external blocker is active; the four red gates are repository defects and remain in this journal rather than `BLOCKED.md`.
+
+## 2026-08-10T19:26:24Z — Streaming log redactor withheld every newest record (integration gate repaired)
+
+> Two agent sessions are working this tree concurrently on `main`. This entry covers only
+> `tooling/dev/log-supervisor.mjs` and `tooling/dev/test/log-supervisor.test.mjs`. The concurrent
+> session owns `tooling/dev/preflight.mjs`, `tooling/dev/test/preflight.test.mjs`,
+> `tooling/run-playwright-owned.mjs`, `tooling/dev/{e2e-server,ownership,up,down,listeners}.mjs`,
+> `tooling/ci/**`, `playwright.config.ts`, and `.github/workflows/**`. Agreed shared-tree rules:
+> explicit-path `git add` only, no `checkout`/`switch`/`restore`/`stash`/`reset`/`clean` on this
+> tree (clean-checkout verification uses `git worktree add` under ignored `.dev/tmp/`), and announce
+> every `dev:down`/`dev:up` cycle before running it.
+
+### Behaviour delivered
+
+- Fixed the root cause of failing gate 2 recorded in the previous entry. `createStreamingRedactor`
+  withheld a **fixed-width** tail of `longestSecretLength - 1` characters from every supervised
+  service log for as long as no further output arrived. Both local secrets are 43 characters, so the
+  last 42 characters of every log were permanently buffered and the newest complete record was
+  structurally unobservable. Before the fix, `.dev/logs/gateway.log` ended mid-UUID at
+  `"requestId":"157acf93-313f-467b-8c26-2c8e9d69d5`; after it, the file ends with a complete record
+  and a newline.
+- Replaced the fixed-width tail with `withheldSuffixLength`, which withholds only the maximal suffix
+  that is a **proper prefix of some redaction value**. Output that cannot extend into a secret — for
+  example `,"status":200}}\n` — is emitted immediately, while a genuine partial match is still held
+  until it resolves. Retaining the *longest* extendable suffix is what preserves the redaction
+  guarantee: any secret occurrence straddling an emit boundary must begin inside that suffix.
+- This was never a flaky test and never an invalid assertion. `tests/integration/foundation-topology.test.ts:302`
+  was correct and was reporting a real log-delivery defect, so no test was weakened, quarantined, or
+  marked flaky. That file is unchanged.
+
+### Commands and evidence
+
+- Pinned Node `24.18.0`: `vitest run tooling/dev/test/log-supervisor.test.mjs --maxWorkers=1` —
+  12/12 passed, including the new regression case, the partial-prefix boundary case, and a
+  600-case seeded `fast-check` property (seed `20260810`) asserting that no emitted chunk ever
+  contains the secret, that streamed output plus flush equals the fully redacted source, and that
+  the withheld amount is exactly the live partial match.
+- `make test-integration` — rebuilt, cycled the owned topology under run
+  `7afaa822-9e69-4db4-8c1e-092d4b59fd32`, and passed **24 of 24** integration cases. The previously
+  failing `logs only the internal correlation ID and stable route class for a new request` now passes.
+- `make test` — 30 files, 238 tests passed. (Count includes the concurrent session's uncommitted
+  preflight tests; only the 12 log-supervisor tests are evidence for this entry.)
+- Targeted `prettier --check` and `eslint --max-warnings 0` on both changed files — exited 0.
+- `tail -2 .dev/logs/gateway.log` plus `tail -c 1 | od -c` — the live log now ends with a complete
+  JSON record terminated by `\n`.
+
+### What is now true
+
+Supervised service logs are observable up to the last byte that cannot be part of a secret, so a
+log-derived assertion can now see the record it just caused. Any `dev:health` result or log-derived
+assertion recorded **before** this fix must not be treated as evidence, because the tail those runs
+read was structurally incomplete.
+
+### Risks, migration, rollback, blockers, and next selection
+
+- The fix only applies to supervisors started after it, so every log written by an older supervisor
+  still has a truncated tail. A `dev:down`/`dev:up` cycle is required before trusting log-derived
+  assertions; the cycle above already did this.
+- `withheldSuffixLength` scans at most `longestSecret - 1` suffix lengths per chunk against at most
+  8 redaction values. With 43-character secrets that is bounded and cheap; the comparison exits at
+  the first differing character in the common case. No unbounded buffer was introduced — the pending
+  buffer is now strictly smaller than before.
+- Rollback is a source-only revert of these two files. No persistent state or schema is involved.
+- No external blocker is active. Remaining Tier 0 red gates (Playwright `webServer` teardown, Linux
+  Redis provisioner, canonical and clean-checkout `verify-all`, dependency admission fields) are
+  owned by the concurrent session.
+- §10.1 next for this session: the lowest incomplete tier reachable without touching the other
+  session's files — **Tier 1**, encoding the eight domain invariants in `packages/ledger` and
+  `packages/pricing` as money types, schema constraints, and a reservation state machine, each
+  attacked by a named seeded property test with a stated case count.

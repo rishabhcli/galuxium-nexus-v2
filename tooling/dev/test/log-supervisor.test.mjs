@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { EventEmitter } from 'node:events';
 import path from 'node:path';
 
+import fc from 'fast-check';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEV_PATHS, REPOSITORY_NAME, REPOSITORY_ROOT, serviceLogPath } from '../constants.mjs';
@@ -10,6 +11,7 @@ import {
   createStreamingRedactor,
   registerSignalForwarders,
   validateSupervisorConfiguration,
+  withheldSuffixLength,
 } from '../log-supervisor.mjs';
 
 const BIRTH_IDENTITY = '12345678-1234-4123-8123-123456789abc';
@@ -35,6 +37,75 @@ describe('bounded supervised log capture', () => {
 
     expect(output).toContain('[REDACTED]');
     expect(output).not.toContain(secret);
+  });
+
+  it('emits a completed record whose tail cannot extend into a secret', () => {
+    // Regression: a fixed-width retained tail held the newest complete log
+    // record hostage until unrelated later output arrived, so the integration
+    // suite could observe every record except the one it had just caused.
+    const secret = 'x7Qb2LPz4Rk9Tn1Vc3Wm5Ye8Zu0Ai6Od2Sg4Fh7Jl9';
+    const redactor = createStreamingRedactor([secret]);
+    const record =
+      '{"event":"service.request_completed","context":{"requestId":"9d1f7c60-0a2b-4c3d-8e4f-5a6b7c8d9e0f","status":200}}\n';
+
+    const emitted = redactor.push(Buffer.from(record));
+
+    expect(emitted).toBe(record);
+    expect(redactor.flush()).toBe('');
+  });
+
+  it('withholds only a genuine partial secret prefix from the stream', () => {
+    const secret = 'test-only-secret-partial-prefix-boundary';
+    const redactor = createStreamingRedactor([secret]);
+    const partial = secret.slice(0, 12);
+
+    const emitted = redactor.push(Buffer.from(`line-one\n${partial}`));
+
+    expect(emitted).toBe('line-one\n');
+    expect(emitted).not.toContain(partial);
+    expect(withheldSuffixLength(`line-one\n${partial}`, [secret])).toBe(partial.length);
+    expect(withheldSuffixLength('line-one\n', [secret])).toBe(0);
+
+    const completed = redactor.push(Buffer.from(`${secret.slice(12)} tail\n`));
+    expect(completed).toBe('[REDACTED] tail\n');
+    expect(redactor.flush()).toBe('');
+  });
+
+  it('never emits a secret and always emits every non-partial byte across 600 seeded chunk splits', () => {
+    const secret = 'test-only-secret-property-boundary-value';
+    fc.assert(
+      fc.property(
+        fc.array(fc.integer({ max: 40, min: 0 }), { maxLength: 24, minLength: 1 }),
+        fc.array(fc.constantFrom('quiet line\n', secret, '{"requestId":"abc"}\n', 'éé'), {
+          maxLength: 6,
+          minLength: 1,
+        }),
+        (splits, parts) => {
+          const source = parts.join('');
+          const redactor = createStreamingRedactor([secret]);
+          const bytes = Buffer.from(source, 'utf8');
+          const emitted = [];
+          let offset = 0;
+          let cursor = 0;
+          while (offset < bytes.length) {
+            const width = Math.max(1, splits[cursor % splits.length] ?? 1);
+            emitted.push(redactor.push(bytes.subarray(offset, offset + width)));
+            offset += width;
+            cursor += 1;
+          }
+          const streamed = emitted.join('');
+          const complete = streamed + redactor.flush();
+
+          expect(streamed).not.toContain(secret);
+          expect(complete).not.toContain(secret);
+          expect(complete).toBe(source.replaceAll(secret, '[REDACTED]'));
+          // Everything still owed must be exactly the live partial match, so
+          // output that cannot become a secret is always already observable.
+          expect(complete.length - streamed.length).toBe(withheldSuffixLength(complete, [secret]));
+        },
+      ),
+      { numRuns: 600, seed: 20260810 },
+    );
   });
 
   it('forwards the actual signal name even though Node signal events have no arguments', () => {

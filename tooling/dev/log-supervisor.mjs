@@ -110,12 +110,36 @@ async function readRedactionValues(paths) {
   return [...new Set(values)].sort((left, right) => right.length - left.length);
 }
 
+/**
+ * Length of the shortest suffix of `text` that must be withheld because it
+ * could still grow into a complete redaction value on a later chunk.
+ *
+ * Withholding a fixed-width tail instead would be unsafe in the opposite
+ * direction: the newest complete output line would stay buffered until
+ * unrelated later output pushed it out, so a log reader could never observe
+ * the most recent record. Only genuine partial matches are withheld here, so
+ * output that cannot extend into a secret is emitted immediately.
+ */
+export function withheldSuffixLength(text, redactions) {
+  const longestRedaction = Math.max(0, ...redactions.map((value) => value.length));
+  const limit = Math.min(longestRedaction - 1, text.length);
+  for (let length = limit; length > 0; length -= 1) {
+    const suffix = text.slice(text.length - length);
+    const extendable = redactions.some(
+      (value) => value.length > length && value.startsWith(suffix),
+    );
+    if (extendable) {
+      return length;
+    }
+  }
+  return 0;
+}
+
 export function createStreamingRedactor(values) {
   const redactions = [
     ...new Set(values.filter((value) => typeof value === 'string' && value.length > 0)),
   ].sort((left, right) => right.length - left.length);
   const decoder = new StringDecoder('utf8');
-  const retainedCharacters = Math.max(0, ...redactions.map((value) => value.length - 1));
   let pending = '';
 
   function redact(value) {
@@ -132,10 +156,12 @@ export function createStreamingRedactor(values) {
     push(chunk) {
       pending += decoder.write(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
       const redacted = redact(pending);
-      if (redacted.length <= retainedCharacters) {
+      const retained = withheldSuffixLength(redacted, redactions);
+      const emitLength = redacted.length - retained;
+      if (emitLength < 1) {
+        pending = redacted;
         return '';
       }
-      const emitLength = redacted.length - retainedCharacters;
       const output = redacted.slice(0, emitLength);
       pending = redacted.slice(emitLength);
       return output;
