@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "target": "linux-x64 on the GitHub-hosted ubuntu-24.04 runner",
-  "claimBoundary": "PostgreSQL and Redis source archives are exact-version and SHA-256 verified, and ambient compiler/linker/configuration selectors are discarded. Compiler, linker, libc, and runner image revisions are observed but not pinned, so compiled binaries are not claimed to be bit-for-bit reproducible.",
+  "claimBoundary": "PostgreSQL and Redis source archives are exact-version and SHA-256 verified, and ambient compiler/linker/configuration selectors are discarded. Compiler, linker, libc, and runner image revisions are observed but not pinned, so compiled binaries are not claimed to be bit-for-bit reproducible. Redis provisions exactly bin/redis-server and bin/redis-cli, asserted after install; no bundled Redis module is built, installed, or admitted by the runtime contract, because port 4166 is cache/coordination only and never monetary authority.",
   "requiredCommands": [
     {
       "name": "ar",

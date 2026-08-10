@@ -16,81 +16,52 @@ import { DevContractError } from './errors.mjs';
 import { ensureDevTree, ensureSecretFile } from './filesystem.mjs';
 import { auditBlockListeners } from './listeners.mjs';
 
+/**
+ * Escapes every regular-expression metacharacter in a literal version string so
+ * a pinned version can never match a looser one. `.` must be escaped for all
+ * occurrences: a partially escaped `16.14.1` would let the unescaped dot match
+ * any character and silently admit a foreign build.
+ */
+export function escapeRegExpLiteral(literal) {
+  return literal.replaceAll(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
+
+const POSTGRES_VERSION_PATTERN = new RegExp(
+  `PostgreSQL\\) ${escapeRegExpLiteral(REQUIRED_POSTGRES_VERSION)}(?:\\s+\\([^\\r\\n]*\\))?$`,
+  'u',
+);
+
+const POSTGRES_TOOL_NAMES = Object.freeze(['postgres', 'initdb', 'createdb', 'psql', 'pg_isready']);
+
 const TOOL_VERSION_CHECKS = Object.freeze([
   Object.freeze({
     args: ['--version'],
     name: 'npm',
-    pattern: new RegExp(`^${REQUIRED_NPM_VERSION.replaceAll('.', '\\.')}\\s*$`, 'u'),
+    pattern: new RegExp(`^${escapeRegExpLiteral(REQUIRED_NPM_VERSION)}\\s*$`, 'u'),
   }),
   Object.freeze({
     args: ['--version'],
     name: 'tsc',
     pattern: new RegExp(
-      `^Version\\s+${REQUIRED_TYPESCRIPT_VERSION.replaceAll('.', '\\.')}\\s*$`,
+      `^Version\\s+${escapeRegExpLiteral(REQUIRED_TYPESCRIPT_VERSION)}\\s*$`,
       'u',
     ),
   }),
-  Object.freeze({
-    args: ['--version'],
-    name: 'postgres',
-    pattern: new RegExp(
-      `PostgreSQL\\) ${REQUIRED_POSTGRES_VERSION.replace('.', '\\.')}(` +
-        `?:\\s+\\([^\\r\\n]*\\))?$`,
-      'u',
-    ),
-  }),
-  Object.freeze({
-    args: ['--version'],
-    name: 'initdb',
-    pattern: new RegExp(
-      `PostgreSQL\\) ${REQUIRED_POSTGRES_VERSION.replace('.', '\\.')}(` +
-        `?:\\s+\\([^\\r\\n]*\\))?$`,
-      'u',
-    ),
-  }),
-  Object.freeze({
-    args: ['--version'],
-    name: 'createdb',
-    pattern: new RegExp(
-      `PostgreSQL\\) ${REQUIRED_POSTGRES_VERSION.replace('.', '\\.')}(` +
-        `?:\\s+\\([^\\r\\n]*\\))?$`,
-      'u',
-    ),
-  }),
-  Object.freeze({
-    args: ['--version'],
-    name: 'psql',
-    pattern: new RegExp(
-      `PostgreSQL\\) ${REQUIRED_POSTGRES_VERSION.replace('.', '\\.')}(` +
-        `?:\\s+\\([^\\r\\n]*\\))?$`,
-      'u',
-    ),
-  }),
-  Object.freeze({
-    args: ['--version'],
-    name: 'pg_isready',
-    pattern: new RegExp(
-      `PostgreSQL\\) ${REQUIRED_POSTGRES_VERSION.replace('.', '\\.')}(` +
-        `?:\\s+\\([^\\r\\n]*\\))?$`,
-      'u',
-    ),
-  }),
+  ...POSTGRES_TOOL_NAMES.map((name) =>
+    Object.freeze({ args: ['--version'], name, pattern: POSTGRES_VERSION_PATTERN }),
+  ),
   Object.freeze({
     args: ['--version'],
     name: 'redis-server',
     pattern: new RegExp(
-      `^Redis server v=${REQUIRED_REDIS_VERSION.replaceAll('.', '\\.')}(` +
-        `?:\\s|$)`,
+      `^Redis server v=${escapeRegExpLiteral(REQUIRED_REDIS_VERSION)}(?:\\s|$)`,
       'u',
     ),
   }),
   Object.freeze({
     args: ['--version'],
     name: 'redis-cli',
-    pattern: new RegExp(
-      `^redis-cli ${REQUIRED_REDIS_VERSION.replaceAll('.', '\\.')}(` + `?:\\s|$)`,
-      'u',
-    ),
+    pattern: new RegExp(`^redis-cli ${escapeRegExpLiteral(REQUIRED_REDIS_VERSION)}(?:\\s|$)`, 'u'),
   }),
 ]);
 

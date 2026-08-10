@@ -258,6 +258,77 @@ export function redisCliVersionOutputMatches(output) {
   return /^redis-cli 8\.10\.0(?=\s|$)/u.test(output);
 }
 
+/**
+ * Installs one compiled binary without invoking the upstream `install` target.
+ *
+ * Redis 8's `src/install` target depends on `all`, which additionally builds
+ * the sentinel, the benchmark and the test modules. Copying the two admitted
+ * binaries keeps the provisioned surface equal to the runtime contract.
+ */
+export async function installCompiledBinary(sourcePath, destinationPath) {
+  assertInsideRepository(destinationPath);
+  const metadata = await fs.lstat(sourcePath);
+  if (!metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error(`Compiled artifact must be a regular non-symlink file: ${sourcePath}`);
+  }
+  await fs.copyFile(sourcePath, destinationPath);
+  await fs.chmod(destinationPath, 0o755);
+}
+
+async function listInstalledEntries(root) {
+  const found = [];
+  const pending = [root];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    const entries = await fs.readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(entryPath);
+      } else {
+        found.push(path.relative(root, entryPath));
+      }
+    }
+  }
+  return found.sort();
+}
+
+/**
+ * Asserts that a provisioned tree contains exactly the admitted executables and
+ * no loadable module. Deriving this from the `make` invocation alone would let a
+ * future upstream default-goal change silently widen what CI provisions.
+ */
+export async function assertExactProvisionedSurface(root, expectedRelativePaths) {
+  const actual = await listInstalledEntries(root);
+  const expected = [...expectedRelativePaths].sort();
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    throw new Error(
+      `Provisioned native surface drifted. Expected exactly [${expected.join(', ')}]; found [${actual.join(', ')}].`,
+    );
+  }
+  const loadableModules = actual.filter((entry) => entry.endsWith('.so'));
+  if (loadableModules.length > 0) {
+    throw new Error(
+      `Refusing a provisioned loadable Redis module; the runtime contract admits none: ${loadableModules.join(', ')}`,
+    );
+  }
+}
+
+export async function assertRequiredExecutables(root, requiredNames) {
+  const binaryRoot = path.join(root, 'bin');
+  const present = new Set(
+    (await fs.readdir(binaryRoot, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() || entry.isSymbolicLink())
+      .map((entry) => entry.name),
+  );
+  const missing = requiredNames.filter((name) => !present.has(name));
+  if (missing.length > 0) {
+    throw new Error(
+      `Provisioned tree is missing executables the dev contract requires: ${missing.join(', ')}`,
+    );
+  }
+}
+
 async function withExtractedSource(artifact, operation) {
   const operationRoot = path.join(TEMPORARY_ROOT, `native-${randomUUID()}`);
   assertInsideRepository(operationRoot);
@@ -302,6 +373,15 @@ async function provisionPostgres() {
   if (!(await executableMatches(postgres, ['--version'], /PostgreSQL\) 16\.14$/u))) {
     throw new Error('Compiled PostgreSQL did not report the required version 16.14.');
   }
+  // Every executable dev:preflight resolves must exist here, or the failure
+  // would otherwise surface much later as a confusing missing-tool error.
+  await assertRequiredExecutables(POSTGRES_ROOT, [
+    'createdb',
+    'initdb',
+    'pg_isready',
+    'postgres',
+    'psql',
+  ]);
   process.stdout.write('[ci-native] PASS compiled PostgreSQL 16.14 from verified source.\n');
 }
 
@@ -320,11 +400,32 @@ async function provisionRedis() {
   await fs.rm(REDIS_ROOT, { force: true, recursive: true });
   try {
     await withExtractedSource(ARTIFACTS.redis, async (sourceRoot) => {
-      await run('make', ['-j2', 'BUILD_TLS=no', 'MALLOC=libc'], { cwd: sourceRoot });
-      await run('make', ['-j2', 'BUILD_TLS=no', 'MALLOC=libc', `PREFIX=${REDIS_ROOT}`, 'install'], {
-        cwd: sourceRoot,
-      });
+      // Redis 8's default goal routes through scripts/build.sh, which builds
+      // every module bundled under modules/*/src in addition to the core. Those
+      // modules need toolchains this job deliberately does not provision (for
+      // example RedisSearch needs Rust), so the default goal fails after the
+      // core has already succeeded. Build the two admitted binaries directly in
+      // src/ instead: `%.o` depends on `.make-prerequisites`, which builds the
+      // vendored deps, so a named-target build is self-contained.
+      //
+      // No bundled module can enter the runtime contract: port 4166 is
+      // cache/coordination only and never monetary authority (GOAL.md §0A.1,
+      // invariant I8), so search/JSON/timeseries/bloom would all be indexing
+      // data that must not live in Redis. PostgreSQL is the only authority.
+      await run(
+        'make',
+        ['-C', 'src', '-j2', 'BUILD_TLS=no', 'MALLOC=libc', 'redis-server', 'redis-cli'],
+        { cwd: sourceRoot },
+      );
+      await ensureRealDirectory(REDIS_ROOT);
+      await ensureRealDirectory(path.join(REDIS_ROOT, 'bin'));
+      await installCompiledBinary(path.join(sourceRoot, 'src', 'redis-server'), redisServer);
+      await installCompiledBinary(path.join(sourceRoot, 'src', 'redis-cli'), redisCli);
     });
+    await assertExactProvisionedSurface(REDIS_ROOT, [
+      path.join('bin', 'redis-cli'),
+      path.join('bin', 'redis-server'),
+    ]);
   } catch (error) {
     await fs.rm(REDIS_ROOT, { force: true, recursive: true });
     throw error;

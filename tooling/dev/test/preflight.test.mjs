@@ -1,3 +1,4 @@
+import * as fc from 'fast-check';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const commandMocks = vi.hoisted(() => ({
@@ -8,7 +9,25 @@ const commandMocks = vi.hoisted(() => ({
 vi.mock('../command.mjs', () => commandMocks);
 
 const { REPOSITORY_ROOT } = await import('../constants.mjs');
-const { verifyRepositoryIsolation, verifyToolchain } = await import('../preflight.mjs');
+const { escapeRegExpLiteral, verifyRepositoryIsolation, verifyToolchain } =
+  await import('../preflight.mjs');
+
+const REGEXP_METACHARACTERS = Object.freeze([
+  '.',
+  '*',
+  '+',
+  '?',
+  '^',
+  '$',
+  '{',
+  '}',
+  '(',
+  ')',
+  '|',
+  '[',
+  ']',
+  '\\',
+]);
 
 const VALID_VERSION_OUTPUT = Object.freeze({
   createdb: 'createdb (PostgreSQL) 16.14 (Homebrew)',
@@ -100,5 +119,37 @@ describe('exact development toolchain identity', () => {
       code: 'DEV_TOOL_VERSION',
       details: expect.objectContaining({ received: output }),
     });
+  });
+
+  it.each([
+    { literal: '16.14.1', looser: '16.14x1' },
+    { literal: '16.14.1', looser: '16x14.1' },
+    { literal: '8.10.0', looser: '8x10x0' },
+    { literal: '1.2.3.4', looser: '1.2.3x4' },
+  ])(
+    'escapes every dot in $literal so it cannot match the looser $looser',
+    ({ literal, looser }) => {
+      const pattern = new RegExp(`^${escapeRegExpLiteral(literal)}$`, 'u');
+      expect(pattern.test(literal)).toBe(true);
+      expect(pattern.test(looser)).toBe(false);
+    },
+  );
+
+  it.each(REGEXP_METACHARACTERS)('escapes the %s metacharacter literally', (metacharacter) => {
+    const literal = `1.0${metacharacter}0`;
+    const pattern = new RegExp(`^${escapeRegExpLiteral(literal)}$`, 'u');
+    expect(pattern.test(literal)).toBe(true);
+    expect(pattern.test('1.0X0')).toBe(false);
+  });
+
+  it('property: an anchored escaped version literal matches exactly itself and nothing else (2000 cases)', () => {
+    const versionLike = fc.stringMatching(/^[\w.+:=\-*?^${}()|[\]\\]{1,24}$/u);
+    fc.assert(
+      fc.property(versionLike, versionLike, (pinned, candidate) => {
+        const pattern = new RegExp(`^${escapeRegExpLiteral(pinned)}$`, 'u');
+        expect(pattern.test(candidate)).toBe(candidate === pinned);
+      }),
+      { numRuns: 2000, seed: 20260810 },
+    );
   });
 });
