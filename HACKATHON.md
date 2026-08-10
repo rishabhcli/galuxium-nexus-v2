@@ -1,8 +1,8 @@
 # Galuxium Nexus V2
 
 > Reference dossier for the Devpost hackathon this repo submits to.
-> Generated Aug 9, 5:19 PM PT. Devpost account `risban933`.
-> **This repo has no project name and no code yet by design.**
+> External-requirements snapshot generated Aug 9, 5:19 PM PT. Devpost account `risban933`.
+> **No product name has been assigned.** See [PROGRESS.md](./PROGRESS.md) for the current implementation state; this file remains the authority for captured hackathon requirements and submission mechanics.
 
 ## At a glance
 
@@ -425,7 +425,7 @@ Prove your software is worth the investment.
 
 ## Submission checklist
 
-- [ ] Decide the project concept
+- [x] Decide the project concept — see [WINNING_IDEA.md](./WINNING_IDEA.md)
 - [ ] Project name (<= 60 chars)
 - [ ] Elevator pitch (<= 200 chars)
 - [ ] Thumbnail image (3:2)

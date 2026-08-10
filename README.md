@@ -6,19 +6,39 @@
 
 ## Repository status
 
-Tier 0 foundation work is in progress. The repository now contains an exact-version TypeScript/npm workspace, executable ownership boundaries, a repository-owned loopback development topology, real dependency-backed readiness, structured redacted logs and metrics, and deterministic local/test failure injection. These surfaces establish an executable development contract only.
+Tier 0 foundation work is in progress. The repository contains an exact-version TypeScript/npm workspace, executable ownership boundaries, a repository-owned loopback development topology, real dependency-backed readiness, structured redacted logs and metrics, and deterministic local/test failure injection. These surfaces establish an executable development contract only.
 
 The budget ledger, pricing and reservation state machine, authenticated provider dispatch, reconciliation workflow, production deployment, and release evidence are not implemented. **This repository is not yet in production.** A passing local health check must not be interpreted as product or release readiness.
 
-| Document | Authority |
+The latest audit is recorded in [PROGRESS.md](./PROGRESS.md). At that checkpoint, the seven-service local topology passed `make dev-health`, while the canonical verifier and Linux CI were still failing. Treat the journal's newest entry and the linked run output as the status source; do not infer completion from an older journal entry or a service responding on a port.
+
+| Document | Role |
 |---|---|
-| [HACKATHON.md](./HACKATHON.md) | Eligibility, mandatory submission fields, judging criteria, deadlines, links |
-| [WINNING_IDEA.md](./WINNING_IDEA.md) | Selected concept, hard technical core, validation, build order, demo and risk analysis |
-| [README.md](./README.md) | Product contract, architecture, production and release expectations |
+| [HACKATHON.md](./HACKATHON.md) | Authority for eligibility, mandatory submission fields, judging criteria, deadlines, and links |
+| [WINNING_IDEA.md](./WINNING_IDEA.md) | Selected concept, hard technical core, validation, build order, demo, and risk analysis |
+| [README.md](./README.md) | Product contract, architecture, production, and release expectations |
 | [AGENTS.md](./AGENTS.md) | Binding implementation rules for every coding agent working in this repository |
-| [GOAL.md](./GOAL.md) | Standing execution order, production definition, tier ladder, evidence protocol and port isolation contract |
+| [GOAL.md](./GOAL.md) | Standing execution order, production definition, tier ladder, evidence protocol, and port isolation contract |
+| [PROGRESS.md](./PROGRESS.md) | Append-only implementation evidence, current gate state, and prioritized next-agent handoff |
+| [SUPPORT_MATRIX.md](./SUPPORT_MATRIX.md) | Evidence-backed supported and unsupported environments and capabilities |
+| [ASSUMPTIONS.md](./ASSUMPTIONS.md) | Append-only decisions made without explicit user direction and their verification paths |
+| [BLOCKED.md](./BLOCKED.md) | External blockers only; implementation defects stay in `PROGRESS.md` |
 
 If these documents disagree, preserve the external requirements in HACKATHON.md, then the product intent in WINNING_IDEA.md, and resolve the conflict explicitly in an ADR instead of guessing.
+
+### Current executable surfaces
+
+| Surface | What exists now | What does not exist yet |
+|---|---|---|
+| Gateway (`127.0.0.1:4160`) | Liveness, dependency-backed readiness, bounded HTTP behavior, safe errors, redacted telemetry | Authentication, quotes, reservations, provider dispatch, settlement |
+| Reconciler (`127.0.0.1:4161`) | Liveness, PostgreSQL/Redis readiness, bounded HTTP behavior | Delayed usage, unknown-outcome recovery, invoice comparison, manual adjustment |
+| Admin (`127.0.0.1:4162`) | Accessible local dependency-status page and status API | Tenants, budgets, keys, ledger, attempts, alerts, or kill controls |
+| Fake provider (`127.0.0.1:4163`) | Deterministic local/test usage and failure contracts | Production-provider support or fallback behavior |
+| PostgreSQL (`127.0.0.1:4165`) | Repository-owned PostgreSQL 16.14 process and least-privilege runtime identity checks | Monetary schema, migrations, row-level security policy, backup/restore |
+| Redis (`127.0.0.1:4166`, DB 6) | Repository-owned Redis 8.10.0 connectivity and namespace checks | Any authority to approve spend; Redis must remain deny-safe only |
+| Metrics (`127.0.0.1:4167`) | Prometheus-compatible foundation/service metrics | Product SLOs, ledger-invariant alerts, dashboards, or runbooks |
+
+The deterministic fake provider and local status UI are verification tools, not a product vertical slice. No real provider request can currently be authorized or dispatched.
 
 ## Product contract
 
@@ -142,7 +162,7 @@ Performance budgets must be set before optimization and enforced in CI for suppo
 
 Accessibility is a release gate, not a polish task. The production interface must include semantic structure, keyboard support, visible focus, sufficient contrast, non-color status cues, reduced-motion behavior where relevant, zoom/reflow, readable errors, and an equivalent representation for information conveyed through canvas, charts, audio, maps, camera, or animation.
 
-## Planned repository layout
+## Repository layout
 
 ```text
 /
@@ -150,24 +170,26 @@ Accessibility is a release gate, not a polish task. The production interface mus
 ├── AGENTS.md                 # Binding implementation rules for coding agents
 ├── HACKATHON.md              # External rules and submission facts
 ├── WINNING_IDEA.md           # Selected product/technical blueprint
-├── services/gateway/
-├── services/reconciler/
-├── packages/ledger/
-├── packages/pricing/
-├── packages/adapters/
-├── apps/admin/
-├── packages/observability/
+├── PROGRESS.md               # Append-only evidence and next-agent handoff
+├── services/gateway/         # Foundation HTTP/readiness; product admission pending
+├── services/reconciler/      # Foundation HTTP/readiness; reconciliation pending
+├── services/fake-provider/   # Deterministic local/test boundary only
+├── services/metrics/         # Foundation Prometheus endpoint
+├── packages/ledger/          # PostgreSQL health boundary; monetary ledger pending
+├── packages/observability/   # Config, HTTP, logs, metrics, redaction, lifecycle
+├── apps/admin/               # Accessible local status surface; product UI pending
 ├── tests/                    # Unit, property, integration, E2E, resilience
 ├── adr/                      # Numbered architecture decisions
 ├── docs/                     # Threat models, runbooks, dependency and evaluation records
-└── infra/                    # Reproducible deployment and environment policy
+├── evidence/                 # Regenerable artifacts only
+└── tooling/                  # Bootstrap, verification, and owned local lifecycle
 ```
 
-This is a boundary contract, not a command to create empty directories. Add a directory when it owns working code, tests, and documentation.
+`packages/pricing`, `packages/adapters`, and production infrastructure are required ownership areas but do not exist yet because the repository prohibits empty scaffolding. Add each directory only with working code, tests, and documentation.
 
 ## Development command contract
 
-No commands are advertised as working until the corresponding toolchain is committed. The first production scaffold must expose one documented, cross-platform command surface, preferably through a checked-in task runner or Makefile:
+The committed Tier 0 foundation exposes the following command surface. A command being present does not mean its later production gate is implemented or green:
 
 | Command | Required behavior |
 |---|---|
@@ -207,6 +229,25 @@ Neither refusal is a skipped or passing gate. `make verify-all` is currently the
 foundation verifier and explicitly does not claim release or production readiness.
 
 A new contributor should be able to move from a clean checkout to a verified local system without tribal knowledge.
+
+### Local foundation quick start
+
+The currently evidenced local path is macOS arm64 with the exact native prerequisites listed above:
+
+```sh
+make bootstrap
+make run-local
+make dev-health
+open http://127.0.0.1:4162
+```
+
+Stop only this repository's verified processes with:
+
+```sh
+make dev-down
+```
+
+Use `make verify-all` for the canonical Tier 0 gate. If it fails, preserve the failure and consult the newest [PROGRESS.md](./PROGRESS.md) entry before doing lower-priority feature work.
 
 ## Environment model
 

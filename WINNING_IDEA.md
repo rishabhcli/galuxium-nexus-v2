@@ -1,6 +1,6 @@
 # Galuxium Nexus V2: Winning Idea Dossier
 
-> **Status:** Idea selected; no product name assigned; no implementation started.
+> **Status:** Idea selected; no product name assigned; Tier 0 local-foundation code is checked in, while the monetary authorization core remains unimplemented. See [PROGRESS.md](./PROGRESS.md) for current evidence and the next work queue.
 > **Submission deadline:** August 31, 2026 at 4:30 AM PT.
 > **Ground truth:** [HACKATHON.md](./HACKATHON.md) remains authoritative for rules, form fields, eligibility, and links.
 
