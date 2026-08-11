@@ -108,3 +108,25 @@ export {
   isAtOrAfter,
 } from './time.js';
 export type { InstantErrorCode, InstantUtc } from './time.js';
+export { MigrationError, migrate, migrationsDirectory, readMigrations } from './migrate.js';
+export type { MigrationErrorCode, MigrationFile, MigrationOutcome } from './migrate.js';
+export {
+  LedgerRepositoryError,
+  checkLedgerInvariant,
+  markDispatched,
+  markUncertain,
+  readBudget,
+  releaseReservation,
+  reserveBudget,
+  settleReservation,
+} from './repository.js';
+export type {
+  BudgetState,
+  InvariantReport,
+  LedgerRepositoryErrorCode,
+  ReleaseOutcome,
+  ReserveOutcome,
+  ReserveRequest,
+  SettleOutcome,
+  SettleRequest,
+} from './repository.js';
