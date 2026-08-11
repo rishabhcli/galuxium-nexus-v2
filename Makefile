@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 .DEFAULT_GOAL := verify-all
 
-.PHONY: bootstrap boundaries build check dependencies-check dependencies-verify dev-down dev-e2e-server dev-health dev-preflight dev-up eval format format-check full-verify lint release-check run-local test test-coverage test-e2e test-integration typecheck verify-all
+.PHONY: bootstrap boundaries build check db-migrate dependencies-check dependencies-verify dev-down dev-e2e-server dev-health dev-preflight dev-up eval format format-check full-verify lint release-check run-local test test-coverage test-e2e test-integration typecheck verify-all
 
 bootstrap:
 	node tooling/bootstrap.mjs
@@ -14,6 +14,9 @@ build:
 
 check:
 	node tooling/run-npm.mjs run check
+
+db-migrate:
+	node tooling/run-npm.mjs run db:migrate
 
 dependencies-check:
 	node tooling/run-npm.mjs run dependencies:check

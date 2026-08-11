@@ -666,3 +666,63 @@ service-level path. The repository remains **not yet in production**.
   worst-case quote that provably upper-bounds actual cost, with the per-budget `max_output_tokens`
   ceiling already present in the schema. That unblocks the `WINNING_IDEA.md` riskiest-assumption
   experiment, which is the overshoot-ratio kill test and is still untested.
+
+## 2026-08-10T18:40:12Z — `db:migrate` registered as a committed command, and a session-overlap correction
+
+### Behaviour delivered
+
+- Registered the migration runner as a first-class command: `npm run db:migrate` and
+  `make db-migrate`. Until now `tooling/db/migrate.mjs` existed but no committed command invoked it,
+  which by the §3.4 step 1 standard makes it not a gate — "any gate that cannot be re-run by a
+  committed command is itself a defect". The schema now has one.
+- Formatted `tooling/dependencies/upstream.mjs`, the single file failing `prettier --check .` and
+  therefore blocking `make verify-all` for every session. It is an untracked leftover that predates
+  the current sessions; formatting changed no behaviour and it remains uncommitted, because neither
+  active session can vouch for whether its content is complete.
+
+### Coordination correction, recorded because it affected the journal
+
+Two sessions were working this tree concurrently and, for a period, were doing **overlapping
+duplicate work on the same paths** — each seeing the other's edits arrive as unexplained external
+modifications, and both committing as the same git identity. Concrete artifacts of that overlap:
+`packages/ledger/src/index.ts` briefly contained the migration and repository export block twice, and
+the `NOT NULL`-on-domain correction appeared in the migration from both directions.
+
+The consequence for this file: the Tier 2 work was committed as `49a3be4` with its own journal entry
+while a second, independently written entry for the same work unit was being appended. That duplicate
+append was removed before committing — it described the same commit, the same 19 integration tests,
+and the same two defects. Nothing committed was rewritten; `PROGRESS.md` stays append-only.
+
+Ownership is now settled and explicit, and both sessions have confirmed it: `packages/ledger/**`,
+`tooling/db/**`, `tests/integration/ledger-schema.test.ts`, and the future `packages/pricing/**` and
+`packages/adapters/**` belong to this session; `tooling/dev/**`, `tooling/ci/**`,
+`.github/workflows/**`, `playwright.config.ts`, and every `services/*` and `apps/*` surface belong to
+the other; `package.json`, `Makefile`, `tsconfig.json`, the lint and cruiser configs, and the four
+Markdown records are shared and announced before editing.
+
+### Commands and evidence
+
+- `npm run boundaries` — 124 modules, 354 dependencies, no violations; the ledger's `pg`-only rule
+  and both negative fixtures still enforced.
+- `prettier --check .` — clean repository-wide after formatting the one blocking file.
+- `vitest run --exclude='tests/integration/**'` — 39 files, 337 tests passed.
+- `vitest run tests/integration/ledger-schema.test.ts --maxWorkers=1` — 19 of 19 passed against live
+  PostgreSQL 16.14 under topology run `f042f28d-28de-4778-ba96-443baa7025d3`.
+
+### What is now true
+
+Every artifact in the Tier 2 schema slice is reachable by a committed command: `make db-migrate`
+applies it, `make test-integration` proves it. Nothing about the product's completeness changed. The
+repository remains **not yet in production**.
+
+### Risks, migration, rollback, blockers, and next selection
+
+- `db:migrate` defaults to this repository's local development contract and overrides every parameter
+  by an explicitly named environment variable. It reads the owner password from a file, never from an
+  argument, so no credential can reach a process listing.
+- No external blocker is active.
+- §10.1 next for this session: `packages/pricing` — versioned per-provider, per-model, per-token and
+  per-tool rates, and the worst-case quote that provably upper-bounds actual cost using the
+  ceiling-division primitive and the per-budget `max_output_tokens` ceiling already in the schema.
+  That unblocks the `WINNING_IDEA.md` riskiest-assumption experiment — the reserved-versus-actual
+  overshoot ratio — which is the one test that can invalidate the concept and is still unrun.
